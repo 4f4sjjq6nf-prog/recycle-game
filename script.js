@@ -229,10 +229,10 @@ class StartScene extends Phaser.Scene {
 
     // ホバー時アニメーション
     startBtn.on('pointerover', () => {
-      startBtn.setScale(0.85);
+      startBtn.setScale(0.8);
     });
     startBtn.on('pointerout', () => {
-      startBtn.setScale(0.8);
+      startBtn.setScale(0.7);
     });
 
     // 🔹クリック時のズーム演出＋シーン遷移
