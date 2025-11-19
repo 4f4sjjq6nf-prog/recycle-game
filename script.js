@@ -1,6 +1,6 @@
-// =======================
+
 // 定義データ
-// =======================
+
 const CATEGORIES = [
   "普通ごみ",
   "資源ごみ",
@@ -88,7 +88,7 @@ class HomeScene extends Phaser.Scene {
     });
   }
 
-  // ------- メニューのポップアップ表示 -------
+  // メニューのポップアップ表示 
   openMenuPopup() {
 
     // 半透明の背景
@@ -135,9 +135,9 @@ class HomeScene extends Phaser.Scene {
 
 
 
-// =======================
+
 // スタート画面
-// =======================
+
 class StartScene extends Phaser.Scene {
   constructor() {
     super('StartScene');
@@ -371,7 +371,7 @@ class GameScene extends Phaser.Scene {
           this.spawnTimer.remove(false);
           this.timerEvent.remove(false);
 
-          // ★ 火災動画シーンへ遷移
+          // 火災動画シーンへ遷移
           this.scene.start("FireScene");
 
           return;
@@ -553,9 +553,9 @@ class GameScene extends Phaser.Scene {
 }
 
 
-// =======================
+
 // リザルト画面
-// =======================
+
 class ResultScene extends Phaser.Scene {
 
   preload() {
