@@ -100,7 +100,7 @@ class HomeScene extends Phaser.Scene {
       .setStrokeStyle(3, 0x666666)
       .setInteractive();
 
-    // ★ 分別チャレンジ
+    // 分別チャレンジ
     const btnChallenge = this.add.text(340, 260, "分別チャレンジ", {
       fontSize: "24px",
       color: "#00796b",
@@ -111,9 +111,9 @@ class HomeScene extends Phaser.Scene {
       this.scene.start('StartScene');
     });
 
-    // ★ アイテム一覧
-    const btnItems = this.add.text(360, 320, "アイテム一覧", {
-      fontSize: "22px",
+    // アイテム一覧
+    const btnItems = this.add.text(340, 320, "アイテム一覧", {
+      fontSize: "24px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
     }).setInteractive({ useHandCursor: true });
@@ -188,16 +188,16 @@ class StartScene extends Phaser.Scene {
       .setScale(0.6);
     this.tweens.add({
       targets: titleLogo,
-      y: 115,           // 少し上へ移動
-      duration: 1100,   // 移動にかかる時間
-      yoyo: true,       // 行って戻る
-      repeat: -1,       // 無限ループ
-      ease: "Sine.easeInOut" // ふわっとした動きにする
+      y: 115,
+      duration: 1100,
+      yoyo: true,  
+      repeat: -1, 
+      ease: "Sine.easeInOut" 
     });
 
     // 難易度ボタン生成
-    this.difficultyButtons = []; // ← ボタン管理用配列
-    this.selectedMark = null;    // ← 現在表示中のマーク
+    this.difficultyButtons = []; // ボタン管理用配列
+    this.selectedMark = null;    // 現在表示中のマーク
 
     let y = 230;
     for (const [key, value] of Object.entries(DIFFICULTY_SETTINGS)) {
@@ -222,9 +222,8 @@ class StartScene extends Phaser.Scene {
     this.showDifficultyMark(this.difficultyButtons[0]);
 
 
-    // ゲーム開始ボタン（画像版）
     const startBtn = this.add.image(490, 354, 'start_button')
-      .setInteractive({ useHandCursor: true }) // クリックできるように
+      .setInteractive({ useHandCursor: true }) 
       .setScale(0.7); // 必要に応じてサイズ調整
 
     // ホバー時アニメーション
@@ -235,7 +234,7 @@ class StartScene extends Phaser.Scene {
       startBtn.setScale(0.7);
     });
 
-    // 🔹クリック時のズーム演出＋シーン遷移
+    // クリック時のズーム演出シーン遷移
     startBtn.on('pointerdown', () => {
       // 二重クリック防止
       startBtn.disableInteractive();
@@ -252,7 +251,7 @@ class StartScene extends Phaser.Scene {
 
       // カメラズーム演出
       const cam = this.cameras.main;
-      cam.pan(140, 450, 2300, 'Sine.easeInOut'); // 工場位置にカメラを移動
+      cam.pan(140, 450, 2300, 'Sine.easeInOut'); 
       cam.zoomTo(3, 3000, 'Sine.easeInOut', true);
 
 
@@ -279,7 +278,7 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    // 各分別区分に対応するゴミ箱画像を読み込む
+
     this.load.image("bin_normal", "assets/bins/bin_normal.png");
     this.load.image("bin_recycle", "assets/bins/bin_recycle.png");
     this.load.image("bin_plastic", "assets/bins/bin_plastic.png");
@@ -299,7 +298,7 @@ class GameScene extends Phaser.Scene {
   create() {
 
 
-    // === 前回までの累積値を読み込む ===
+    // === 前回までの値を読み込む ===
     recycleCounts = JSON.parse(localStorage.getItem("recycleCounts")) || {
       pet: 0,
       can: 0,
@@ -337,7 +336,7 @@ class GameScene extends Phaser.Scene {
       const bin = this.add.image(x, y, binImages[category]).setScale(0.7);
       bin.setData("category", category);
 
-      // ドロップ判定エリアを設定（透明な矩形でもOK）
+      // ドロップ判定エリアを設定
       const zone = this.add.zone(x, y, bin.displayWidth, bin.displayHeight)
         .setRectangleDropZone(bin.displayWidth, bin.displayHeight)
         .setData("category", category);
@@ -347,7 +346,7 @@ class GameScene extends Phaser.Scene {
     }
 
 
-    // ドラッグ設定（同じ）
+    // ドラッグ設定
     this.input.on("dragstart", (p, obj) => (obj.isDragging = true));
     this.input.on("drag", (p, obj, x, y) => {
       obj.x = x;
@@ -363,7 +362,7 @@ class GameScene extends Phaser.Scene {
         if (obj.texture.key === "battery" && !correct) {
 
           // このプレイで増えたゲージを破棄
-          // → 直前の localStorage の状態に戻す（何も保存しない）
+          // → 直前の localStorage の状態に戻す
           recycleCounts = JSON.parse(localStorage.getItem("recycleCounts")) || {
             pet: 0, can: 0, bottle: 0
           };
@@ -379,15 +378,15 @@ class GameScene extends Phaser.Scene {
         }
       }
       if (correct) {
-        // === ゴミの種類によってゲージ加算 ===
+        // ゴミの種類によってゲージ加算
         const keyName = obj.texture.key;
 
-        // ★ 難易度ごとのゲージ加算量
+        // 難易度ごとのゲージ加算量
         let add = 1; // easy のデフォルト
         if (this.difficultyKey === "normal") add = 2;
         if (this.difficultyKey === "hard") add = 4;
 
-        // ★ ゴミの種類によってゲージ加算
+        // ゴミの種類によってゲージ加算
         if (keyName === "petbottle") recycleCounts.pet += add;
         if (keyName === "can") recycleCounts.can += add;
         if (keyName === "bottle") recycleCounts.bottle += add;
@@ -399,22 +398,22 @@ class GameScene extends Phaser.Scene {
         score += 5;
         this.scoreText.setText("スコア: " + score);
 
-        // === pop パーティクル（その場で成長→縮小） ===
+        // パーティクル（その場で成長→縮小）
         const bx = zone.x;
         const by = zone.y; // ゴミ箱の少し上
 
         const particleCount = 8;
         for (let i = 0; i < particleCount; i++) {
-          // 少しランダムに位置をばらす
+          // ランダムに位置をばらす
           const sx = bx + Phaser.Math.Between(-35, 35);
           const sy = by + Phaser.Math.Between(-50, 50);
 
-          // 小さな星スプライト（最初は小）
+          // 小さな星
           const sp = this.add.image(sx, sy, 'spark')
             .setScale(0.05)
             .setAlpha(0.9);
 
-          // ① ふくらむ（pop）
+          // ふくらむ
           this.tweens.add({
             targets: sp,
             scale: { from: 0.05, to: 0.6 },
@@ -423,7 +422,7 @@ class GameScene extends Phaser.Scene {
             ease: 'Back.easeOut',
             onComplete: () => {
 
-              // ② しぼんで消える
+              // しぼんで消える
               this.tweens.add({
                 targets: sp,
                 scale: { from: 0.6, to: 0 },
@@ -437,7 +436,7 @@ class GameScene extends Phaser.Scene {
           });
         }
 
-        // ゴミの消滅演出（既存）
+        // ゴミの消滅演出
         this.tweens.add({
           targets: obj,
           alpha: 0,
@@ -506,16 +505,16 @@ class GameScene extends Phaser.Scene {
     this.trashGroup.getChildren().forEach(trash => {
       if (!trash.isDragging) trash.x += trash.speed * dt;
 
-      // ★ 右端判定
+      // 右端判定
       if (trash.x > 800) {
 
-        // ✔ 減点処理
+        // 減点処理
         const miss = this.settings.missPoint; // 難易度に応じた値
         score += miss;
         if (score < 0) score = 0;
         this.scoreText.setText("スコア: " + score);
 
-        // ✔ 減点エフェクトテキスト（画面上で小さく縮む）
+        // 減点エフェクトテキスト
         const text = this.add.text(trash.x, trash.y, `${miss} pt`, {
           fontSize: "30px",
           color: "#ff0000",
@@ -524,7 +523,7 @@ class GameScene extends Phaser.Scene {
           .setOrigin(0.5)
           .setScale(0.1);  // 最初は小さく
 
-        // 🎬 出現 → 縮小 → 消えるアニメーション
+        // 出現 縮小 消える
         this.tweens.add({
           targets: text,
           scale: { from: 0.1, to: 1.0 },
@@ -532,7 +531,7 @@ class GameScene extends Phaser.Scene {
           duration: 200,
           ease: "Back.easeOut",
           onComplete: () => {
-            // 第二段階（縮小＆フェードアウト）
+            // 縮小 フェードアウト
             this.tweens.add({
               targets: text,
               scale: { from: 1.0, to: 0 },
@@ -544,7 +543,7 @@ class GameScene extends Phaser.Scene {
           }
         });
 
-        // ✔ ゴミを削除
+        // ゴミを削除
         trash.destroy();
       }
     });
@@ -576,24 +575,24 @@ class ResultScene extends Phaser.Scene {
     const max = 7;
     const ratio = Phaser.Math.Clamp(value / max, 0, 1);
 
-    // --- 背景（角丸）
+    // 背景
     const bg = this.add.graphics();
     bg.fillStyle(0xffffff, 1);
     bg.lineStyle(3, 0x666666, 1);
     bg.fillRoundedRect(x, y - height / 2, width, height, 12);
     bg.strokeRoundedRect(x, y - height / 2, width, height, 12);
 
-    // --- バックバー（固定）
+    // バックバー
     const back = this.add.graphics();
     back.fillStyle(0xa9a9a9, 1);
     back.fillRoundedRect(x, y - height / 2, width, height, 12);
 
-    // --- メインバー（伸縮するバー）
+    // メインバー
     const bar = this.add.graphics();
     bar.fillStyle(0x7ee8c2, 1);
     bar.fillRoundedRect(x, y - height / 2, 0, height, 12);
 
-    // ★ Tween でゲージ量を管理するための「ダミーオブジェクト」
+    // Tweenダミーオブジェクト
     const gauge = { w: 0 };
 
     this.tweens.add({
@@ -608,14 +607,14 @@ class ResultScene extends Phaser.Scene {
       }
     });
 
-    // --- 数値表示
+    // 数値表示
     this.add.text(x + width + 12, y - 12, `${value} / ${max}`, {
       fontSize: "20px",
       color: "#333",
       fontStyle: "bold"
     });
 
-    // --- 満タン演出 ---
+    // 満タン演出
     if (value >= max) {
       const flash = this.add.rectangle(x + width / 2, y, width, height, 0xffffff)
         .setAlpha(0);
@@ -660,10 +659,10 @@ class ResultScene extends Phaser.Scene {
 
     for (let i = 0; i < 3; i++) {
 
-      // ★ ゲージを描画
+      // ゲージを描画
       this.drawGauge(260, y, 300, 20, counts[keys[i]]);
 
-      // ★ アイコンを表示（左側）
+      // アイコンを表示（左側）
       this.add.image(242, y, gaugeIcons[keys[i]])
         .setScale(0.4)
         .setOrigin(0.5);
@@ -671,7 +670,7 @@ class ResultScene extends Phaser.Scene {
       y += 70;
     }
 
-    // === タイトルに戻るボタン（画像版） ===
+    // タイトルに戻るボタン（画像版）
     const backBtn = this.add.image(400, 400, "back_button")
       .setInteractive({ useHandCursor: true })
       .setScale(0.6);
@@ -696,7 +695,7 @@ class ResultScene extends Phaser.Scene {
       });
     });
 
-    // クリック時：押し込み + シーン遷移
+    // 押し込みシーン遷移
     backBtn.on("pointerdown", () => {
 
       backBtn.disableInteractive();  // 二度押し防止
