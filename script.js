@@ -30,7 +30,7 @@ let currentDifficulty = "easy";
 
 let score = 0;
 
-// === リサイクルゲージ集計用（GameScene の先頭に追加） ===
+// リサイクルゲージ集計用（GameScene の先頭に追加）
 let recycleCounts = {
   pet: 0,      // ペットボトル
   can: 0,      // 缶
@@ -43,7 +43,7 @@ class HomeScene extends Phaser.Scene {
 
   preload() {
     this.load.image('menu_button', 'assets/ui/menu_button.png'); // ハンバーガーメニュー
-    this.load.image('menu_bg', 'assets/ui/menu_bg.png'); // 半透明背景 or 白パネル
+    this.load.image('menu_bg', 'assets/ui/menu_bg.png'); // 半透明背景
   }
 
   create() {
@@ -298,7 +298,7 @@ class GameScene extends Phaser.Scene {
   create() {
 
 
-    // === 前回までの値を読み込む ===
+    //前回までの値を読み込む
     recycleCounts = JSON.parse(localStorage.getItem("recycleCounts")) || {
       pet: 0,
       can: 0,
@@ -362,7 +362,7 @@ class GameScene extends Phaser.Scene {
         if (obj.texture.key === "battery" && !correct) {
 
           // このプレイで増えたゲージを破棄
-          // → 直前の localStorage の状態に戻す
+          // 直前の localStorage の状態に戻す
           recycleCounts = JSON.parse(localStorage.getItem("recycleCounts")) || {
             pet: 0, can: 0, bottle: 0
           };
@@ -408,7 +408,7 @@ class GameScene extends Phaser.Scene {
           const sx = bx + Phaser.Math.Between(-35, 35);
           const sy = by + Phaser.Math.Between(-50, 50);
 
-          // 小さな星
+          // 小さい星
           const sp = this.add.image(sx, sy, 'spark')
             .setScale(0.05)
             .setAlpha(0.9);
@@ -662,7 +662,7 @@ class ResultScene extends Phaser.Scene {
       // ゲージを描画
       this.drawGauge(260, y, 300, 20, counts[keys[i]]);
 
-      // アイコンを表示（左側）
+      // アイコンを表示
       this.add.image(242, y, gaugeIcons[keys[i]])
         .setScale(0.4)
         .setOrigin(0.5);
@@ -670,7 +670,7 @@ class ResultScene extends Phaser.Scene {
       y += 70;
     }
 
-    // タイトルに戻るボタン（画像版）
+    // タイトルに戻るボタン
     const backBtn = this.add.image(400, 400, "back_button")
       .setInteractive({ useHandCursor: true })
       .setScale(0.6);
