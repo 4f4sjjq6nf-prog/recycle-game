@@ -1,5 +1,5 @@
 
-// 定義データ
+//定義データ
 
 const CATEGORIES = [
   "普通ごみ",
@@ -14,56 +14,78 @@ const ITEMS = {
   "資源ごみ": ["缶", "ビン", "ペットボトル"],
   "プラスチック資源": ["カップ麺の容器", "パック", "タッパー", "ペットボトルのキャップ"],
   "古紙衣類": ["新聞紙", "段ボール", "紙パック", "衣類"],
-  "バッテリー類": ["バッテリー"]
+  "バッテリー類": ["バッテリー", "ハンディファン"]
 };
-// 難易度設定（スピード倍率と区分数の上限）
+//難易度設定
 const DIFFICULTY_SETTINGS = {
-  easy: { label: "かんたん", speedMultiplier: 1.0, categories: 3, spawnRate: 2500, missPoint: -2 },
+  easy: { label: "かんたん", speedMultiplier: 1.0, categories: 3, spawnRate: 3500, missPoint: -2 },
   normal: { label: "ふつう", speedMultiplier: 1.0, categories: 4, spawnRate: 2000, missPoint: -3 },
   hard: { label: "むずかしい", speedMultiplier: 1.0, categories: 5, spawnRate: 1700, missPoint: -4 }
 };
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// 現在の難易度をグローバルに保持
+//現在の難易度をグローバルに保持
 let currentDifficulty = "easy";
 
 let score = 0;
 
-// リサイクルゲージ集計用（GameScene の先頭に追加）
+//リサイクルゲージ集計
 let recycleCounts = {
   pet: 0,      // ペットボトル
   can: 0,      // 缶
   bottle: 0,   // ビン
 };
+//所持アイテムデータ
+let ownedItems = JSON.parse(localStorage.getItem("ownedItems")) || [];
+
 class HomeScene extends Phaser.Scene {
   constructor() {
     super('HomeScene');
   }
 
   preload() {
-    this.load.image('menu_button', 'assets/ui/menu_button.png'); // ハンバーガーメニュー
-    this.load.image('menu_bg', 'assets/ui/menu_bg.png'); // 半透明背景
+    this.load.image("char_sad", "assets/char/char_sad.png");
+    this.load.image("char_teach", "assets/char/char_teach.png");
+    this.load.image("char_normal", "assets/char/char_normal.png");
+    this.load.image("char_happy", "assets/char/char_happy.png");
+    this.load.image("home_bg", "assets/backgrounds/home_bg.png");
+    this.load.image("back_button", "assets/ui/back_button.png");
+    this.load.image('menu_button', 'assets/ui/menu_button.png');
+    this.load.image("icon_pet", "assets/ui/pet_icon.png");
+    this.load.image("icon_can", "assets/ui/can_icon.png");
+    this.load.image("icon_bottle", "assets/ui/bottle_icon.png");
+    this.load.image("back_button", "assets/ui/back_button.png");
+    this.load.image("result_bg", "assets/backgrounds/result_bg.png");
+    this.load.image("pet_juice", "assets/ui/pet_juice.png");
+    this.load.image("rucksack", "assets/ui/rucksack.png");
+    this.load.image("ruler", "assets/ui/ruler.png");
+    this.load.image("jersey", "assets/ui/jersey.png");
+    this.load.image("bead", "assets/ui/bead.png");
+    this.load.image("glass_juice", "assets/ui/glass_juice.png");
+    this.load.image("cup", "assets/ui/cup.png");
+    this.load.image("fan", "assets/ui/fan.png");
+    this.load.image("clock", "assets/ui/clock.png");
+    this.load.image("bike", "assets/ui/bike.png");
+    this.load.image("bike_home", "assets/ui/bike_home.png");
+    this.load.image("help_button", "assets/ui/help_button.png");
+    this.load.image("help_panel", "assets/ui/help_panel.png");
   }
 
   create() {
-    this.add.text(250, 260, "ホーム（生活演出）", {
-      fontSize: "32px",
-      color: "#333",
-      padding: { top: 10, bottom: 0 }
-    });
 
 
-    // 右上のメニューボタン
+    //メニューボタン
     const menuBtn = this.add.image(760, 40, 'menu_button')
       .setInteractive({ useHandCursor: true })
-      .setScale(0.3);
+      .setScale(0.3)
+      .setDepth(20);
 
 
 
 
 
-    // ホバー時：少し大きく
+    //ホバー
     menuBtn.on("pointerover", () => {
       this.tweens.add({
         targets: menuBtn,
@@ -73,7 +95,7 @@ class HomeScene extends Phaser.Scene {
       });
     });
 
-    // ホバー解除：元に戻る
+    //ホバー解除
     menuBtn.on("pointerout", () => {
       this.tweens.add({
         targets: menuBtn,
@@ -86,6 +108,91 @@ class HomeScene extends Phaser.Scene {
     menuBtn.on('pointerdown', () => {
       this.openMenuPopup();
     });
+
+
+
+    //ホーム背景
+
+    this.add.image(400, 300, "home_bg").setDisplaySize(800, 600).setDepth(0);
+
+
+    //所持アイテム読み込み
+    const owned = JSON.parse(localStorage.getItem("ownedItems")) || [];
+
+    // キャラの位置と大きさ
+    const cx = 300;
+    const cy = 500;
+    const cScale = 0.25;
+
+    // 通常キャラ
+    this.charNormal = this.add.image(cx, cy, "char_normal")
+      .setScale(cScale)
+      .setDepth(5);
+
+    // 喜び
+    this.charHappy = this.add.image(cx, cy, "char_happy")
+      .setScale(cScale)
+      .setDepth(5)
+      .setVisible(false);
+
+    // 全アイテム所持チェック
+    const ALL_ITEMS = [
+      "pet_juice", "rucksack", "ruler", "jersey",
+      "fan", "bike", "clock",
+      "glass_juice", "bead", "cup"
+    ];
+
+    const allGot = ALL_ITEMS.every(i => owned.includes(i));
+
+    // 全アイテム揃っていたらポーズ切替アニメを開始
+    if (allGot) {
+      this.time.addEvent({
+        delay: 600,
+        loop: true,
+        callback: () => {
+          const n = this.charNormal.visible;
+          this.charNormal.setVisible(!n);
+          this.charHappy.setVisible(n);
+        }
+      });
+    }
+    //ホームに表示するアイテム
+    const HOME_ITEMS = [
+      "fan",
+      "bike",
+      "clock",
+      "cup",
+      "glass_juice",
+      "pet_juice",
+      "rucksack"
+    ];
+
+    const ITEM_POS = {
+      fan: { x: 240, y: 420, scale: 0.22 },
+      bike: { x: 58, y: 503, scale: 0.8 },
+      clock: { x: 525, y: 330, scale: 0.13 },
+      cup: { x: 463, y: 513, scale: 0.11 },
+      glass_juice: { x: 500, y: 478, scale: 0.14 },
+      pet_juice: { x: 530, y: 489, scale: 0.14 },
+      rucksack: { x: 670, y: 500, scale: 0.2 }
+    };
+
+
+    for (const key of HOME_ITEMS) {
+
+      // 所持していなければ表示しない
+      if (!owned.includes(key)) continue;
+
+      // テクスチャ名の変換
+      const texture = (key === "bike") ? "bike_home" : key;
+
+      const p = ITEM_POS[key];
+
+      // depth は必要に応じて統一した数値（3など）で描画
+      this.add.image(p.x, p.y, texture)
+        .setScale(p.scale)
+        .setDepth(3);
+    }
   }
 
   // メニューのポップアップ表示 
@@ -93,30 +200,30 @@ class HomeScene extends Phaser.Scene {
 
     // 半透明の背景
     const bg = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.4)
-      .setInteractive();
-
+      .setInteractive()
+      .setDepth(200);
     // メニューパネル
     const panel = this.add.rectangle(400, 300, 300, 200, 0xffffff, 1)
       .setStrokeStyle(3, 0x666666)
-      .setInteractive();
-
+      .setInteractive()
+      .setDepth(201);
     // 分別チャレンジ
-    const btnChallenge = this.add.text(340, 260, "分別チャレンジ", {
+    const btnChallenge = this.add.text(320, 260, "分別チャレンジ", {
       fontSize: "24px",
       color: "#00796b",
       padding: { top: 10, bottom: 0 }
-    }).setInteractive({ useHandCursor: true });
+    }).setInteractive({ useHandCursor: true }).setDepth(202);
 
     btnChallenge.on('pointerdown', () => {
       this.scene.start('StartScene');
     });
 
     // アイテム一覧
-    const btnItems = this.add.text(340, 320, "アイテム一覧", {
+    const btnItems = this.add.text(320, 320, "アイテム一覧", {
       fontSize: "24px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
-    }).setInteractive({ useHandCursor: true });
+    }).setInteractive({ useHandCursor: true }).setDepth(202);
 
     btnItems.on('pointerdown', () => {
       this.scene.start('ItemScene');
@@ -129,21 +236,19 @@ class HomeScene extends Phaser.Scene {
       btnChallenge.destroy();
       btnItems.destroy();
     });
+
+
   }
 }
 
 
-
-
-
-// スタート画面
-
+//ミニゲームスタート画面
 class StartScene extends Phaser.Scene {
   constructor() {
     super('StartScene');
   }
   preload() {
-    // 各カテゴリごとに使用する画像を読み込み
+
     this.load.image('start_bg', 'assets/backgrounds/start_bg.png');
     this.load.image('title_logo', 'assets/ui/title_logo.png');
     this.load.image('start_button', 'assets/ui/start_button.png');
@@ -165,17 +270,19 @@ class StartScene extends Phaser.Scene {
     this.load.image('kamipack', 'assets/trash/kamipack.png');
     this.load.image('cloth', 'assets/trash/cloth.png');
     this.load.image('battery', 'assets/trash/battery.png');
+    this.load.image('handyfan', 'assets/trash/handyfan.png');
+
   }
   create() {
 
     currentDifficulty = "easy";
 
-    // 難易度選択マークを表示する関数
+    // 難易度選択マーク表示関数
     this.showDifficultyMark = (btn) => {
       // 既存マークがあれば削除
       if (this.selectedMark) this.selectedMark.destroy();
 
-      // 新しいマークを作成（ボタン左側に配置）
+      // 新しいマークを作成
       this.selectedMark = this.add.image(btn.x - 20, btn.y + 13, 'check_icon')
         .setScale(0.45);
     };
@@ -183,21 +290,21 @@ class StartScene extends Phaser.Scene {
     this.add.image(400, 300, 'start_bg').setDisplaySize(800, 600);
 
 
-    // 画面中央上あたりに配置
+    // タイトルロゴ
     const titleLogo = this.add.image(400, 130, 'title_logo')
       .setScale(0.6);
     this.tweens.add({
       targets: titleLogo,
       y: 115,
       duration: 1100,
-      yoyo: true,  
-      repeat: -1, 
-      ease: "Sine.easeInOut" 
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut"
     });
 
-    // 難易度ボタン生成
-    this.difficultyButtons = []; // ボタン管理用配列
-    this.selectedMark = null;    // 現在表示中のマーク
+
+    this.difficultyButtons = [];
+    this.selectedMark = null;
 
     let y = 230;
     for (const [key, value] of Object.entries(DIFFICULTY_SETTINGS)) {
@@ -218,32 +325,78 @@ class StartScene extends Phaser.Scene {
       y += 50;
     }
 
-    // 初期マーク表示（デフォルト：かんたん）
+    // 初期マーク表示
     this.showDifficultyMark(this.difficultyButtons[0]);
+
+    // 戻るボタン
+    const backBtn = this.add.image(490, 280, "back_button")
+      .setInteractive({ useHandCursor: true })
+      .setScale(0.7);
+
+    // ホバー演出
+    backBtn.on("pointerover", () => {
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.8,
+        duration: 120
+      });
+    });
+    backBtn.on("pointerout", () => {
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.7,
+        duration: 120
+      });
+    });
+
+    // クリックでホームへ戻る
+    backBtn.on("pointerdown", () => {
+      backBtn.disableInteractive();
+
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.6,
+        duration: 100,
+        yoyo: true
+      });
+
+      this.time.delayedCall(150, () => {
+        this.scene.start("HomeScene");
+      });
+    });
+
 
 
     const startBtn = this.add.image(490, 354, 'start_button')
-      .setInteractive({ useHandCursor: true }) 
-      .setScale(0.7); // 必要に応じてサイズ調整
+      .setInteractive({ useHandCursor: true })
+      .setScale(0.7);
 
     // ホバー時アニメーション
-    startBtn.on('pointerover', () => {
-      startBtn.setScale(0.8);
+    startBtn.on("pointerover", () => {
+      this.tweens.add({
+        targets: startBtn,
+        scale: 0.8,
+        duration: 120
+      });
     });
-    startBtn.on('pointerout', () => {
-      startBtn.setScale(0.7);
+    startBtn.on("pointerout", () => {
+      this.tweens.add({
+        targets: startBtn,
+        scale: 0.7,
+        duration: 120
+      });
     });
 
-    // クリック時のズーム演出シーン遷移
+    // クリック時のズーム演出シーン
     startBtn.on('pointerdown', () => {
       // 二重クリック防止
       startBtn.disableInteractive();
 
 
-      // クリック演出（少し押し込み）
+      // クリック演出
       this.tweens.add({
         targets: startBtn,
-        scale: 0.75,
+        scale: 0.6,
         duration: 150,
         yoyo: true,
         ease: 'Sine.easeInOut'
@@ -251,7 +404,7 @@ class StartScene extends Phaser.Scene {
 
       // カメラズーム演出
       const cam = this.cameras.main;
-      cam.pan(140, 450, 2300, 'Sine.easeInOut'); 
+      cam.pan(140, 450, 2300, 'Sine.easeInOut');
       cam.zoomTo(3, 3000, 'Sine.easeInOut', true);
 
 
@@ -278,13 +431,17 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
-
+    this.load.image("bubble", "assets/ui/bubble.png");
     this.load.image("bin_normal", "assets/bins/bin_normal.png");
     this.load.image("bin_recycle", "assets/bins/bin_recycle.png");
     this.load.image("bin_plastic", "assets/bins/bin_plastic.png");
     this.load.image("bin_paper", "assets/bins/bin_paper.png");
     this.load.image("bin_battery", "assets/bins/bin_battery.png");
     this.load.image("spark", "assets/effects/spark.png");
+    this.load.image("focus_lines", "assets/ui/focus_lines.png");
+    this.load.image("nice", "assets/ui/nice.png");
+    this.load.image("perfect", "assets/ui/perfect.png");
+    this.load.image("char_frame", "assets/ui/char_frame.png");
   }
 
   init(data) {
@@ -293,9 +450,97 @@ class GameScene extends Phaser.Scene {
     this.settings = DIFFICULTY_SETTINGS[this.difficultyKey];
   }
 
+  openHelpPopup() {
+
+    // 暗幕（ポップアップ中もゲーム進行のため入力だけ取る）
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(200)
+      .setInteractive();   // クリックを
+
+    // パネル画像（分別表）
+    const panel = this.add.image(400, 300, "help_panel")
+      .setDepth(201)
+      .setScale(0.6)
+    //.setInteractive();  //パネルクリックで閉じないようブロック
+
+    // パネル内クリックは閉じない
+    panel.on("pointerdown", (e) => e.stopPropagation());
+
+    // 暗幕クリックで閉じる
+    dim.on("pointerdown", () => {
+      dim.destroy();
+      panel.destroy();
+    });
+  }
+
+
 
 
   create() {
+    //上部の帯状エリア
+    this.header = this.add.rectangle(400, 35, 800, 70, 0xffe0c1)
+      .setDepth(100);
+    //帯エリアのアウトライン
+    this.headerLine = this.add.rectangle(400, 70, 800, 1, 0x333333)
+      .setDepth(101);
+
+    //キャラクターの枠線
+    this.charframe = this.add.image(390, 60, "char_frame")
+      .setDepth(102)
+      .setScale(0.5);
+
+
+    //キャラクター
+    this.char = this.add.image(390, 60, "char_normal")
+      .setDepth(103)
+      .setScale(0.13);
+
+    // 吹き出し
+    this.bubble = this.add.image(540, 60, "bubble")
+      .setDepth(103)
+      .setScale(0.36)
+      .setVisible(false);
+
+    this.bubbleText = this.add.text(460, 38, "", {
+      fontSize: "14px",
+      color: "#000",
+      fontStyle: "bold",
+      wordWrap: { width: 140 },
+      padding: { top: 10, bottom: 0 }
+    })
+      .setDepth(104)
+      .setVisible(false);
+
+    // リアクション中かどうか
+    this.charTimer = null;
+
+    // キャラの状態を変更する関数
+    this.showChar = (key, duration = 2000, text = "") => {
+      // 前のリアクションを中断
+      if (this.charTimer) {
+        this.time.removeEvent(this.charTimer);
+        this.charTimer = null;
+      }
+
+      // キャラ画像の差し替え
+      this.char.setTexture(key);
+
+      // 吹き出しを使う場合
+      if (text) {
+        this.bubble.setVisible(true);
+        this.bubbleText.setText(text).setVisible(true);
+      } else {
+        this.bubble.setVisible(false);
+        this.bubbleText.setVisible(false);
+      }
+
+      // 一定時間後に normal へ戻す
+      this.charTimer = this.time.delayedCall(duration, () => {
+        this.char.setTexture("char_normal");
+        this.bubble.setVisible(false);
+        this.bubbleText.setVisible(false);
+      });
+    };
 
 
     //前回までの値を読み込む
@@ -304,12 +549,34 @@ class GameScene extends Phaser.Scene {
       can: 0,
       bottle: 0,
     };
+    //連続成功カウント
+
+    this.combo = 0;
 
 
-    // UI
+
     this.timeLimit = 30;
-    this.timerText = this.add.text(20, 20, "時間: 60", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } });
-    this.scoreText = this.add.text(650, 20, "スコア: 0", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } });
+    this.timerText = this.add.text(20, 20, "時間: 60", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
+    this.scoreText = this.add.text(180, 20, "スコア: 0", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
+
+    // ？ボタン
+    this.helpBtn = this.add.image(760, 35, "help_button")
+      .setDepth(110)        //帯より前
+      .setScale(0.15)
+      .setInteractive({ useHandCursor: true });
+
+    // ホバー演出
+    this.helpBtn.on("pointerover", () => {
+      this.tweens.add({ targets: this.helpBtn, scale: 0.17, duration: 120 });
+    });
+    this.helpBtn.on("pointerout", () => {
+      this.tweens.add({ targets: this.helpBtn, scale: 0.15, duration: 120 });
+    });
+
+    // クリックでヘルプポップアップ
+    this.helpBtn.on("pointerdown", () => {
+      this.openHelpPopup();
+    });
 
     // 分別エリア数を難易度に応じて制限
     const categoryCount = this.settings.categories;
@@ -341,7 +608,7 @@ class GameScene extends Phaser.Scene {
         .setRectangleDropZone(bin.displayWidth, bin.displayHeight)
         .setData("category", category);
 
-      // 名前表示
+
 
     }
 
@@ -359,15 +626,18 @@ class GameScene extends Phaser.Scene {
       if (!zone) return;
       const correct = obj.category === zone.getData("category");
       if (this.difficultyKey === "hard") {
-        if (obj.texture.key === "battery" && !correct) {
+
+        // 危険物扱いのアイテム
+        const dangerItems = ["battery", "handyfan"];
+
+        if (dangerItems.includes(obj.texture.key) && !correct) {
 
           // このプレイで増えたゲージを破棄
-          // 直前の localStorage の状態に戻す
           recycleCounts = JSON.parse(localStorage.getItem("recycleCounts")) || {
             pet: 0, can: 0, bottle: 0
           };
 
-          // タイマーなど停止
+          // タイマー停止
           this.spawnTimer.remove(false);
           this.timerEvent.remove(false);
 
@@ -377,12 +647,17 @@ class GameScene extends Phaser.Scene {
           return;
         }
       }
+
       if (correct) {
+        // キャラクターの正解リアクション
+        this.showChar("char_happy", 2000);
+
+        this.combo++;
         // ゴミの種類によってゲージ加算
         const keyName = obj.texture.key;
 
         // 難易度ごとのゲージ加算量
-        let add = 1; // easy のデフォルト
+        let add = 1;
         if (this.difficultyKey === "normal") add = 2;
         if (this.difficultyKey === "hard") add = 4;
 
@@ -395,12 +670,23 @@ class GameScene extends Phaser.Scene {
         localStorage.setItem("recycleCounts", JSON.stringify(recycleCounts));
 
 
-        score += 5;
+        // 基本スコア
+        let addScore = 5;
+
+        // 5回以上連続成功で Perfect → +2
+        if (this.combo >= 5) {
+          addScore += 2;
+        }
+
+        score += addScore;
         this.scoreText.setText("スコア: " + score);
 
-        // パーティクル（その場で成長→縮小）
+        this.showComboEffect(this.combo);
+
+
+        // パーティクル
         const bx = zone.x;
-        const by = zone.y; // ゴミ箱の少し上
+        const by = zone.y;
 
         const particleCount = 8;
         for (let i = 0; i < particleCount; i++) {
@@ -445,10 +731,48 @@ class GameScene extends Phaser.Scene {
           onComplete: () => obj.destroy()
         });
       } else {
+        this.combo = 0;
+        //　不正解リアクション
+        if (this.difficultyKey === "easy") {
+
+          const wrongName = obj.texture.key;// 失敗したゴミ
+          const categoryCorrectKanji = obj.category;
+
+          // 表示名変換
+          const DISPLAY_NAME = {
+            fishbone: "魚の骨", shoe: "靴", plate: "皿",
+            glove: "グローブ", glasses: "メガネ",
+            can: "缶", bottle: "ビン", petbottle: "ペットボトル",
+            cupramen: "カップ麺の容器", pack: "パック", tupper: "タッパー", cap: "キャップ",
+            newspaper: "新聞紙", cardboard: "段ボール", kamipack: "紙パック", cloth: "衣類",
+            battery: "バッテリー", handyfan: "ハンディファン"
+          };
+          const CATEGORY_HIRAGANA = {
+            "普通ごみ": "ふつうゴミ",
+            "資源ごみ": "しげんゴミ",
+            "プラスチック資源": "プラスチックしげん",
+            "古紙衣類": "古紙衣類",
+            "バッテリー類": "バッテリー"
+          };
+          const showItemName = DISPLAY_NAME[wrongName] || wrongName;
+          const categoryHira = CATEGORY_HIRAGANA[categoryCorrectKanji] || categoryCorrectKanji;
+          // 吹き出しテキスト
+          const message = `${showItemName}は\n${categoryHira}だよ！`;
+
+          // 3秒間 teach 表示
+          this.showChar("char_teach", 3000, message);
+
+        } else {
+
+          // normal・hard は sad を2秒表示
+          this.showChar("char_sad", 2000);
+        }
+
+
         this.tweens.add({
           targets: obj,
           x: 50,
-          y: Phaser.Math.Between(100, 400),
+          y: Phaser.Math.Between(180, 400),
           duration: 300,
           ease: "Sine.easeInOut"
         });
@@ -477,6 +801,7 @@ class GameScene extends Phaser.Scene {
     this.selectedCategories = selectedCategories;
   }
 
+
   spawnTrash() {
     const category = Phaser.Utils.Array.GetRandom(this.selectedCategories);
     const items = {
@@ -484,11 +809,11 @@ class GameScene extends Phaser.Scene {
       "資源ごみ": ["can", "bottle", "petbottle"],
       "プラスチック資源": ["cupramen", "pack", "tupper", "cap"],
       "古紙衣類": ["newspaper", "cardboard", "kamipack", "cloth"],
-      "バッテリー類": ["battery"]
+      "バッテリー類": ["battery", "handyfan"]
     };
     const key = Phaser.Utils.Array.GetRandom(items[category]);
 
-    const y = Phaser.Math.Between(100, 400);
+    const y = Phaser.Math.Between(180, 400);//ゴミが出現する範囲
     const trash = this.add.image(50, y, key).setScale(0.4);
     trash.displayWidth = 120;
     trash.scaleY = trash.scaleX;
@@ -521,9 +846,9 @@ class GameScene extends Phaser.Scene {
           fontStyle: "bold"
         })
           .setOrigin(0.5)
-          .setScale(0.1);  // 最初は小さく
+          .setScale(0.1);
 
-        // 出現 縮小 消える
+
         this.tweens.add({
           targets: text,
           scale: { from: 0.1, to: 1.0 },
@@ -548,6 +873,54 @@ class GameScene extends Phaser.Scene {
       }
     });
   }
+  showComboEffect(combo) {
+
+    const isPerfect = combo >= 5;
+    const key = isPerfect ? "perfect" : "nice";
+
+    // 集中線（背面）
+    const focus = this.add.image(400, 300, "focus_lines")
+      .setScale(0)
+      .setAlpha(0)
+      .setDepth(50);
+
+    this.tweens.add({
+      targets: focus,
+      scale: { from: 0, to: 0.5 },
+      alpha: { from: 0, to: 0.6 },
+      duration: 180,
+      ease: "Back.easeOut"
+    });
+
+    // Nice! / Perfect!
+    const txt = this.add.image(400, 300, key)
+      .setScale(0)
+      .setAlpha(0)
+      .setDepth(51);
+
+    this.tweens.add({
+      targets: txt,
+      scale: { from: 0, to: 0.5 },
+      alpha: { from: 0, to: 1 },
+      duration: 300,
+
+      onComplete: () => {
+        // フェードアウト
+        this.tweens.add({
+          targets: [txt, focus],
+          scale: "+=0.3",
+          alpha: 0,
+          duration: 300,
+
+          onComplete: () => {
+            txt.destroy();
+            focus.destroy();
+          }
+        });
+      }
+    });
+  }
+
 
 
 }
@@ -559,12 +932,10 @@ class GameScene extends Phaser.Scene {
 class ResultScene extends Phaser.Scene {
 
   preload() {
-
-    this.load.image("icon_pet", "assets/ui/pet_icon.png");
-    this.load.image("icon_can", "assets/ui/can_icon.png");
-    this.load.image("icon_bottle", "assets/ui/bottle_icon.png");
-    this.load.image("back_button", "assets/ui/back_button.png");
-    this.load.image("result_bg", "assets/backgrounds/result_bg.png");
+    this.load.image("recycle_box", "assets/ui/recycle_box.png");
+    this.load.image("best_update", "assets/char/best_update.png");
+    this.load.image("spark", "assets/effects/spark.png");
+    this.load.image("text_get", "assets/ui/text_get.png");
   }
 
   constructor() {
@@ -608,11 +979,11 @@ class ResultScene extends Phaser.Scene {
     });
 
     // 数値表示
-    this.add.text(x + width + 12, y - 12, `${value} / ${max}`, {
-      fontSize: "20px",
-      color: "#333",
-      fontStyle: "bold"
-    });
+    //this.add.text(x + width + 12, y - 12, `${value} / ${max}`, {
+    //  fontSize: "20px",
+    //  color: "#333",
+    //  fontStyle: "bold"
+    //});
 
     // 満タン演出
     if (value >= max) {
@@ -628,22 +999,305 @@ class ResultScene extends Phaser.Scene {
       });
     }
   }
+  openTreasure() {
+
+
+    // アイテム登場
+    this.spawnTreasureItem();
+  }
+
+  // 宝箱を開いて光を出す
+  showTreasureAnimation() {
+
+    this.dimLayer.setVisible(true);
+    this.dimLayer.setDepth(20);
+    this.dimLayer.setAlpha(0);
+    this.dimLayer.setInteractive();
+
+    this.tweens.add({
+      targets: this.dimLayer,
+      alpha: 0.55,
+      duration: 200
+    });
+
+    // 毎回フェードインする
+    this.dimLayer.setAlpha(0);
+    this.tweens.add({
+      targets: this.dimLayer,
+      alpha: 0.55,
+      duration: 200
+    });
+
+
+    // 宝箱表示
+    this.box = this.add.image(400, 330, "recycle_box")
+      .setScale(0.3)
+      .setAlpha(0)
+      .setDepth(30);
+
+    this.tweens.add({
+      targets: this.box,
+      alpha: { from: 0, to: 1 },
+      scale: { from: 0.3, to: 0.6 },
+      duration: 600,
+      ease: "Back.easeOut",
+      onComplete: () => {
+        this.tweens.add({
+          targets: this.box,
+          angle: { from: -3, to: 3 },
+          duration: 120,
+          yoyo: true,
+          repeat: 5,
+          ease: "Sine.easeInOut",
+          onComplete: () => this.openTreasure()
+        });
+      }
+    });
+  }
+
+
+
+  spawnTreasureItem() {
+
+    // 宝箱削除
+    if (this.box && !this.box.destroyed) {
+      this.box.destroy();
+      this.box = null;
+    }
+
+    // 集中線
+    const focus = this.add.image(400, 300, "focus_lines")
+      .setScale(0)
+      .setAlpha(0)
+      .setDepth(28);
+
+    this.tweens.add({
+      targets: focus,
+      alpha: { from: 3, to: 5 },
+      scale: { from: 0, to: 0.8 },
+      duration: 400,
+      ease: "Back.easeOut"
+    });
+
+
+    const GAUGE_ITEMS = {
+      pet: ["pet_juice", "rucksack", "ruler", "jersey"],
+      can: ["fan", "bike", "clock"],
+      bottle: ["glass_juice", "bead", "cup"]
+    };
+
+    const gaugeType = this.fullGauges[this.currentIndex];
+    const list = GAUGE_ITEMS[gaugeType] || [];
+    const candidates = list.filter(i => !ownedItems.includes(i));
+
+    //候補が無ければこのゲージをスキップ
+    if (candidates.length === 0) {
+      console.warn("このゲージのアイテムは全て所持済み");
+
+
+
+
+      this.currentIndex++;
+
+      if (this.currentIndex < this.fullGauges.length) {
+        this.time.delayedCall(300, () => this.showTreasureAnimation());
+      } else {
+        this.time.delayedCall(300, () => {
+          this.tweens.add({
+            targets: this.dimLayer,
+            alpha: 0,
+            duration: 300,
+            onComplete: () => {
+              this.dimLayer.setVisible(false);
+              this.dimLayer.disableInteractive();
+            }
+          });
+        });
+      }
+      return;
+    }
+
+
+
+    const selected = Phaser.Utils.Array.GetRandom(candidates);
+
+    // 所持リスト保存
+    ownedItems.push(selected);
+    localStorage.setItem("ownedItems", JSON.stringify(ownedItems));
+
+    // アイテム登場
+    this.item = this.add.image(400, 300, selected)
+      .setScale(0)
+      .setAlpha(0)
+      .setDepth(31);
+
+    this.tweens.add({
+      targets: this.item,
+      alpha: 1,
+      scale: { from: 0, to: 0.8 },
+      duration: 600,
+      ease: "Back.easeOut",
+      onStart: () => {
+        this.tweens.add({
+          targets: focus,
+          alpha: 0,
+          scale: 1.2,
+          duration: 300,
+          ease: "Quad.easeIn",
+          onComplete: () => focus.destroy()
+        });
+      }
+    });
+
+    // 星エフェクト
+    for (let i = 0; i < 15; i++) {
+      const sp = this.add.image(400, 300, "spark")
+        .setScale(0.05)
+        .setAlpha(1)
+        .setDepth(32);
+
+      this.tweens.add({
+        targets: sp,
+        x: 400 + Phaser.Math.Between(-150, 150),
+        y: 300 + Phaser.Math.Between(-150, 150),
+        scale: { from: 0, to: 1.5 },
+        alpha: { from: 1, to: 0 },
+        duration: 450,
+        ease: "Quad.easeOut",
+        onComplete: () => sp.destroy()
+      });
+    }
+
+    // 「アイテム獲得」
+    this.textGet = this.add.image(400, 430, "text_get")
+      .setOrigin(0.5)
+      .setDepth(33)
+      .setScale(0);
+
+    this.tweens.add({
+      targets: this.textGet,
+      scale: { from: 0, to: 0.7 },
+      duration: 300,
+      ease: "Back.easeOut"
+    });
+
+    // ゲージ減算
+    const MAX = 7;
+    recycleCounts[gaugeType] = Math.max(0, recycleCounts[gaugeType] - MAX);
+    localStorage.setItem("recycleCounts", JSON.stringify(recycleCounts));
+
+    this.input.removeAllListeners("pointerdown");
+
+    this.dimLayer.once("pointerdown", () => {
+      this.closeTreasure();
+      this.currentIndex++;
+
+      if (this.currentIndex < this.fullGauges.length) {
+        this.time.delayedCall(300, () => this.showTreasureAnimation());
+      } else {
+        this.time.delayedCall(300, () => {
+          this.tweens.add({
+            targets: this.dimLayer,
+            alpha: 0,
+            duration: 300,
+            onComplete: () => {
+              this.dimLayer.setVisible(false);
+              this.dimLayer.disableInteractive();
+            }
+          });
+        });
+      }
+    });
+
+  }
+
+
+
+
+
+
+  closeTreasure() {
+
+    //宝箱削除
+    if (this.box) {
+      this.box.destroy();
+      this.box = null;
+    }
+
+    // アイテムとテキストのフェードアウト
+    const objs = [this.item, this.textGet];
+
+    objs.forEach(obj => {
+      if (!obj) return;
+
+      this.tweens.add({
+        targets: obj,
+        alpha: 0,
+        scale: 0.2,
+        duration: 300,
+        onComplete: () => obj.destroy()
+      });
+    });
+    if (this.dimLayer) {
+      this.dimLayer.setVisible(false);
+      this.dimLayer.disableInteractive();
+      this.dimLayer.removeAllListeners();
+    }
+  }
+
+
+
+
 
 
 
 
   create() {
+
+
     this.add.image(400, 300, 'result_bg').setDisplaySize(800, 600);
+
+    // 背景の暗幕
+    this.dimLayer = this.add.rectangle(400, 300, 800, 600, 0x000000)
+      .setDepth(20)
+      .setVisible(false)
+      .setAlpha(0)
+      .setInteractive();
+
+
 
 
 
     this.add.text(450, 98, `${score}`, {
       fontSize: '28px', color: '#000000ff', padding: { top: 10, bottom: 0 }, fontStyle: "bold"
     });
+    //  ベストスコアの読み込み
+    let bestScore = Number(localStorage.getItem("bestScore")) || 0;
+
+    //  今回スコアがベストスコアを超えたか？
+    const isBestUpdate = score > bestScore;
+
+    // 表示するベストスコアは更新前の値
+    this.add.text(442, 157, `${bestScore}`, {
+      fontSize: '22px',
+      color: '#000',
+      fontStyle: "bold"
+    });
+
+    // 更新していたら演出
+    if (isBestUpdate) {
+      const img = this.add.image(650, 220, "best_update")
+
+        .setScale(0.3);
+
+
+
+    }
+
 
     // セーブデータ読み込み
     const counts = JSON.parse(localStorage.getItem("recycleCounts")) || {
-      pet: 0, can: 0, bottle: 0, plastic: 0
+      pet: 0, can: 0, bottle: 0
     };
 
     // アイコン対応表
@@ -655,15 +1309,15 @@ class ResultScene extends Phaser.Scene {
 
     const keys = ["pet", "can", "bottle"];
 
-    let y = 170;
+    let y = 220;
 
     for (let i = 0; i < 3; i++) {
 
       // ゲージを描画
-      this.drawGauge(260, y, 300, 20, counts[keys[i]]);
+      this.drawGauge(270, y, 300, 20, counts[keys[i]]);
 
       // アイコンを表示
-      this.add.image(242, y, gaugeIcons[keys[i]])
+      this.add.image(252, y, gaugeIcons[keys[i]])
         .setScale(0.4)
         .setOrigin(0.5);
 
@@ -671,25 +1325,25 @@ class ResultScene extends Phaser.Scene {
     }
 
     // タイトルに戻るボタン
-    const backBtn = this.add.image(400, 400, "back_button")
+    const backBtn = this.add.image(400, 450, "back_button")
       .setInteractive({ useHandCursor: true })
-      .setScale(0.6);
+      .setScale(0.8);
 
-    // ホバー時：少し大きく
+    // ホバー時
     backBtn.on("pointerover", () => {
       this.tweens.add({
         targets: backBtn,
-        scale: 0.7,
+        scale: 0.9,
         duration: 120,
         ease: "Sine.easeOut"
       });
     });
 
-    // ホバー解除：元に戻る
+    // ホバー解除
     backBtn.on("pointerout", () => {
       this.tweens.add({
         targets: backBtn,
-        scale: 0.6,
+        scale: 0.8,
         duration: 120,
         ease: "Sine.easeOut"
       });
@@ -698,12 +1352,15 @@ class ResultScene extends Phaser.Scene {
     // 押し込みシーン遷移
     backBtn.on("pointerdown", () => {
 
-      backBtn.disableInteractive();  // 二度押し防止
-
+      backBtn.disableInteractive();
+      // ベストスコア更新保存
+      if (score > bestScore) {
+        localStorage.setItem("bestScore", String(score));
+      }
       // 押し込みアニメーション
       this.tweens.add({
         targets: backBtn,
-        scale: 0.6,
+        scale: 0.7,
         duration: 120,
         yoyo: true,
         ease: "Sine.easeInOut"
@@ -714,6 +1371,72 @@ class ResultScene extends Phaser.Scene {
         this.scene.start("HomeScene");
       });
     });
+    // 満タンだったゲージをチェックして配列に入れる
+    const MAX = 7;
+    this.fullGauges = [];
+
+
+
+
+    const GAUGE_ITEMS = {
+      pet: ["pet_juice", "rucksack", "ruler", "jersey"],
+      can: ["fan", "bike", "clock"],
+      bottle: ["glass_juice", "bead", "cup"]
+    };
+
+    this.fullGauges = [];
+
+    for (const type of ["pet", "can", "bottle"]) {
+      if (counts[type] >= MAX) {
+
+        const remains = GAUGE_ITEMS[type].filter(i => !ownedItems.includes(i));
+
+        if (remains.length > 0) {
+
+          this.fullGauges.push(type);
+        }
+      }
+    }
+
+
+    //アイテムを全所持していたら宝箱演出をスキップ
+    const allItems = [
+      "pet_juice", "rucksack", "ruler", "jersey",
+      "fan", "bike", "clock",
+      "glass_juice", "bead", "cup"
+    ];
+
+    // セーブされている所持アイテム
+    ownedItems = JSON.parse(localStorage.getItem("ownedItems")) || [];
+
+    // 未所持アイテムの確認
+    const remainingItems = allItems.filter(i => !ownedItems.includes(i));
+
+
+    if (remainingItems.length === 0) {
+      console.log("全アイテム所持済みのため宝箱スキップ");
+      return;
+    }
+
+    // fullGaugesを残りアイテムの数に制限
+    const remainingItemsCount = remainingItems.length;
+
+
+    if (this.fullGauges.length > remainingItemsCount) {
+      this.fullGauges = this.fullGauges.slice(0, remainingItemsCount);
+    }
+
+
+    // ゲージ満タンで未所持アイテムがある時だけ宝箱へ
+    if (this.fullGauges.length > 0) {
+      this.currentIndex = 0;
+      this.showTreasureAnimation();
+    }
+
+
+
+
+
 
 
 
@@ -724,24 +1447,236 @@ class ItemScene extends Phaser.Scene {
     super('ItemScene');
   }
 
+  preload() {
+    this.load.image("item_bg", "assets/backgrounds/item_bg.png");
+    this.load.image("item_frame", "assets/ui/item_frame.png");
+    this.load.image("desc_frame", "assets/ui/desc_frame.png");
+  }
+
   create() {
-    this.add.text(250, 260, "アイテム一覧", {
-      fontSize: "32px",
+    this.add.image(400, 300, "item_bg").setDisplaySize(800, 600).setDepth(0);
+    this.add.text(290, 20, "アイテム一覧", {
+      fontSize: "34px",
       color: "#333",
+      fontStyle: "bold",
       padding: { top: 10, bottom: 0 }
+
     });
 
-    const back = this.add.text(340, 360, "ホームに戻る", {
-      fontSize: "22px",
-      color: "#00796b",
-      padding: { top: 10, bottom: 0 }
-    }).setInteractive({ useHandCursor: true });
+    //アイテム一覧取得
+    ownedItems = JSON.parse(localStorage.getItem("ownedItems")) || [];
 
-    back.on('pointerdown', () => {
-      this.scene.start('HomeScene');
+    if (ownedItems.length === 0) {
+      this.add.text(200, 300, "まだアイテムを持っていない！", {
+        fontSize: "28px",
+        color: "#444",
+        padding: { top: 10, bottom: 0 }
+      });
+    } else {
+
+      const startX = 190;
+      const startY = 140;
+      const gapX = 140;
+      const gapY = 140;
+      let index = 0;
+
+      ownedItems.forEach(id => {
+        const col = index % 4;
+        const row = Math.floor(index / 4);
+
+        const x = startX + col * gapX;
+        const y = startY + row * gapY;
+
+        // アイテム枠画像
+        const frame = this.add.image(x, y, "item_frame")
+          .setScale(0.38)
+          .setDepth(10)
+          .setInteractive({ useHandCursor: true });
+
+        frame.itemId = id;
+
+        // アイテム画像
+        const icon = this.add.image(x, y, id)
+          .setScale(0.17)
+          .setDepth(11);
+
+        // クリックでポップアップ
+        frame.on("pointerdown", () => this.showPopup(id));
+
+
+        index++;
+      });
+    }
+
+    // 戻るボタン
+    const backBtn = this.add.image(400, 540, "back_button")
+      .setInteractive({ useHandCursor: true })
+      .setScale(0.8);
+
+    // ホバー演出
+    backBtn.on("pointerover", () => {
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.9,
+        duration: 120,
+        ease: "Sine.easeOut"
+      });
+    });
+    backBtn.on("pointerout", () => {
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.8,
+        duration: 120,
+        ease: "Sine.easeOut"
+      });
+    });
+
+    // クリックでホームへ戻る
+    backBtn.on("pointerdown", () => {
+      backBtn.disableInteractive();
+
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.7,
+        duration: 120,
+        yoyo: true
+      });
+
+      this.time.delayedCall(200, () => {
+        this.scene.start("HomeScene");
+      });
+    });
+
+  }
+
+  showPopup(id) {
+
+    //暗幕
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(50)
+      .setInteractive();
+
+    //パネル
+    const panel = this.add.rectangle(400, 300, 500, 380, 0xffffff)
+      .setDepth(51)
+      .setStrokeStyle(4, 0x666666)
+      .setInteractive();
+
+    //アイテム画像
+    const img = this.add.image(400, 220, id)
+      .setDepth(52)
+      .setScale(0.35);
+
+
+
+    //リンク用データ
+    const linkData = {
+      pet_juice: "https://www.asahi.com/sdgs/article/14879392",
+      rucksack: "https://www.youtube.com/watch?v=MBv-IQ8bpDI",
+      jersey: "https://www.youtube.com/watch?v=MBv-IQ8bpDI",
+      glass_juice: "https://www.asahi.com/sdgs/article/14879392",
+      cup: "https://prtimes.jp/main/html/rd/p/000000001.000117550.html"
+    };
+
+    const descriptionData = {
+      pet_juice: "回収されたペットボトルから、あたらしい\nペットボトルが作られることもあります。\nこれを「水平リサイクル」と呼びます。",
+      rucksack: "ペットボトルからリサイクルされたリュッ\nクサック。\nペットボトルから作られたポリエステル繊\n維は、耐久性が高く、水分を吸いにくいた\nめ、乾きやすいという特徴があります。",
+      ruler: "ペットボトルからリサイクルされたものさ\nし。\nプラスチックでできている文房具はペット\nボトルからリサイクルされているものがあ\nります。",
+      jersey: "回収されたペットボトルは、洗われて細か\nいフレークにくだかれます。そのフレーク\nをさらに溶かして、細い糸のようにしてい\nきます。できあがった糸をあつめて布にす\nると、ジャージやバッグなど、新しい製品\nとして生まれ変わることができます。",
+      fan: "缶からリサイクルされた扇風機。スチール\n缶はモーターの部品にリサイクルされるこ\nともあります。\n扇風機以外にも家電の部品に再生され、生\n活を支えています。",
+      bike: "アルミ缶やスチール缶はリサイクルされて\n自転車の部品になることもあります。\nアルミ缶約1000個で１台の自転車が完成し\nます。※12kgの自転車で全部品がアルミで\n作られているとした場合。",
+      clock: "缶からリサイクルされた目覚まし時計。\nスチール缶はモーターの部品にリサイクル\nされることもあります。",
+      glass_juice: "回収されたビンから、あたらしいビンが作\nられることもあります。\nこれを「水平リサイクル」と呼びます。",
+      bead: "ビンからリサイクルされたビー玉。\nビー玉以外にも建物の断熱材などに再生さ\nれています",
+      cup: "ビンからリサイクルされたガラスコップ。\nコップ以外にも建物の断熱材などに再生さ\nれています"
+    };
+    const descFrame = this.add.image(400, 380, "desc_frame")
+      .setDepth(51)
+      .setScale(0.6);
+
+
+    //説明テキスト
+    const baseText = this.add.text(230, 375, descriptionData[id] || "", {
+      fontSize: "18px",
+      color: "#333",
+      wordWrap: { width: 380 },
+      padding: { top: 10, bottom: 0 }
+    }).setDepth(52).setOrigin(0, 0.5);
+
+    // URLが存在するアイテムだけURLリンクを表示する
+    const url = linkData[id];
+
+    let linkLabel = null;
+    let linkText = null;
+
+    if (url) {
+
+      linkLabel = this.add.text(
+        235,
+        443,
+        "くわしくはこちら↓",
+        {
+          fontSize: "15px",
+          color: "#333",
+          padding: { top: 10, bottom: 0 }
+        }
+      )
+        .setDepth(52)
+        .setOrigin(0, 0.5);
+
+      linkText = this.add.text(
+        235,
+        460,
+        url,
+        {
+          fontSize: "18px",
+          color: "#00aaff",
+          fontStyle: "underline"
+        }
+      )
+        .setInteractive({ useHandCursor: true })
+        .setDepth(52)
+        .setOrigin(0, 0.5);
+
+      // クリックでサイトを開く
+      linkText.on("pointerdown", () => window.open(url, "_blank"));
+      linkText.on("pointerover", () => linkText.setColor("#55ccff"));
+      linkText.on("pointerout", () => linkText.setColor("#00aaff"));
+    }
+
+
+    if (linkText) {
+
+      linkText.on("pointerdown", () => {
+        const url = linkData[id];
+        if (url) window.open(url, "_blank");
+      });
+
+      linkText.on("pointerover", () => linkText.setColor("#55ccff"));
+      linkText.on("pointerout", () => linkText.setColor("#00aaff"));
+    }
+
+
+    //ポップアップを解除するとき削除する
+    dim.once("pointerdown", () => {
+      dim.destroy();
+      panel.destroy();
+      img.destroy();
+      baseText.destroy();
+      descFrame.destroy();
+      if (linkLabel) linkLabel.destroy();
+      if (linkText) linkText.destroy();
+    });
+
+
+    // パネル内クリックは反応させず閉じない
+    panel.on("pointerdown", (e) => {
+      e.stopPropagation();
     });
   }
+
 }
+
 class FireScene extends Phaser.Scene {
   constructor() {
     super("FireScene");
@@ -749,7 +1684,7 @@ class FireScene extends Phaser.Scene {
 
   preload() {
     this.load.video("battery_fire", "assets/video/battery_fire.mp4", true);
-    this.load.image("back_button", "assets/ui/back_button.png");
+
   }
 
 
@@ -780,14 +1715,14 @@ class FireScene extends Phaser.Scene {
   showBackButton() {
     const btn = this.add.image(400, 500, "back_button")
       .setInteractive({ useHandCursor: true })
-      .setScale(0.6);
+      .setScale(0.8);
 
     btn.on("pointerover", () => {
-      this.tweens.add({ targets: btn, scale: 0.7, duration: 150 });
+      this.tweens.add({ targets: btn, scale: 0.9, duration: 150 });
     });
 
     btn.on("pointerout", () => {
-      this.tweens.add({ targets: btn, scale: 0.6, duration: 150 });
+      this.tweens.add({ targets: btn, scale: 0.8, duration: 150 });
     });
 
     btn.on("pointerdown", () => {
@@ -795,7 +1730,7 @@ class FireScene extends Phaser.Scene {
 
       this.tweens.add({
         targets: btn,
-        scale: 0.5,
+        scale: 0.7,
         duration: 100,
         yoyo: true,
       });
