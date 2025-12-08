@@ -70,6 +70,7 @@ class HomeScene extends Phaser.Scene {
     this.load.image("bike_home", "assets/ui/bike_home.png");
     this.load.image("help_button", "assets/ui/help_button.png");
     this.load.image("help_panel", "assets/ui/help_panel.png");
+    this.load.image("complete", "assets/ui/complete.png");
   }
 
   create() {
@@ -146,6 +147,9 @@ class HomeScene extends Phaser.Scene {
 
     // 全アイテム揃っていたらポーズ切替アニメを開始
     if (allGot) {
+      this.add.image(160, 470, "complete")
+        .setDepth(190)
+        .setScale(0.3)
       this.time.addEvent({
         delay: 600,
         loop: true,
@@ -296,74 +300,74 @@ class StartScene extends Phaser.Scene {
   }
   openHowtoPopup() {
 
-  //暗幕
-  const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
-    .setDepth(200)
-    .setInteractive();
+    //暗幕
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(200)
+      .setInteractive();
 
-  //ページ1
-  const page1 = this.add.image(400, 300, "howto_page1")
-    .setDepth(201)
-    .setScale(0.6);
+    //ページ1
+    const page1 = this.add.image(400, 300, "howto_page1")
+      .setDepth(201)
+      .setScale(0.6);
 
-  //右矢印ページ２へ
-  const arrowRight = this.add.image(730, 300, "arrow_right")
-    .setDepth(202)
-    .setScale(0.3)
-    .setInteractive({ useHandCursor: true });
+    //右矢印ページ２へ
+    const arrowRight = this.add.image(730, 300, "arrow_right")
+      .setDepth(202)
+      .setScale(0.3)
+      .setInteractive({ useHandCursor: true });
 
-  //ページ２最初は非表示
-  const page2 = this.add.image(400, 300, "howto_page2")
-    .setDepth(201)
-    .setScale(0.6)
-    .setVisible(false);
+    //ページ２最初は非表示
+    const page2 = this.add.image(400, 300, "howto_page2")
+      .setDepth(201)
+      .setScale(0.6)
+      .setVisible(false);
 
-  //左矢印ページ１へ、最初は非表示
-  const arrowLeft = this.add.image(70, 300, "arrow_left")
-    .setDepth(202)
-    .setScale(0.3)
-    .setVisible(false)
-    .setInteractive({ useHandCursor: true });
-
-
-  //右矢印：ページ２
-
-  arrowRight.on("pointerdown", () => {
-    page1.setVisible(false);
-    arrowRight.setVisible(false);
-
-    page2.setVisible(true);
-    arrowLeft.setVisible(true);
-  });
+    //左矢印ページ１へ、最初は非表示
+    const arrowLeft = this.add.image(70, 300, "arrow_left")
+      .setDepth(202)
+      .setScale(0.3)
+      .setVisible(false)
+      .setInteractive({ useHandCursor: true });
 
 
-  //左矢印：ページ１に戻る
+    //右矢印：ページ２
 
-  arrowLeft.on("pointerdown", () => {
-    page2.setVisible(false);
-    arrowLeft.setVisible(false);
+    arrowRight.on("pointerdown", () => {
+      page1.setVisible(false);
+      arrowRight.setVisible(false);
 
-    page1.setVisible(true);
-    arrowRight.setVisible(true);
-  });
+      page2.setVisible(true);
+      arrowLeft.setVisible(true);
+    });
 
 
-  //　暗幕クリックでポップアップ閉じる
+    //左矢印：ページ１に戻る
 
-  dim.on("pointerdown", () => {
-    dim.destroy();
-    page1.destroy();
-    page2.destroy();
-    arrowLeft.destroy();
-    arrowRight.destroy();
-  });
+    arrowLeft.on("pointerdown", () => {
+      page2.setVisible(false);
+      arrowLeft.setVisible(false);
 
-  // パネル内クリックは閉じない
-  page1.on("pointerdown", e => e.stopPropagation());
-  page2.on("pointerdown", e => e.stopPropagation());
-  arrowLeft.on("pointerdown", e => e.stopPropagation());
-  arrowRight.on("pointerdown", e => e.stopPropagation());
-}
+      page1.setVisible(true);
+      arrowRight.setVisible(true);
+    });
+
+
+    //　暗幕クリックでポップアップ閉じる
+
+    dim.on("pointerdown", () => {
+      dim.destroy();
+      page1.destroy();
+      page2.destroy();
+      arrowLeft.destroy();
+      arrowRight.destroy();
+    });
+
+    // パネル内クリックは閉じない
+    page1.on("pointerdown", e => e.stopPropagation());
+    page2.on("pointerdown", e => e.stopPropagation());
+    arrowLeft.on("pointerdown", e => e.stopPropagation());
+    arrowRight.on("pointerdown", e => e.stopPropagation());
+  }
 
   create() {
 
