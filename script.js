@@ -45,6 +45,11 @@ class HomeScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("howto_page1", "assets/ui/howto_page1.png");
+    this.load.image("howto_page2", "assets/ui/howto_page2.png");
+    this.load.image("arrow_left", "assets/ui/arrow_left.png");
+    this.load.image("arrow_right", "assets/ui/arrow_right.png");
+    this.load.image("howto_button", "assets/ui/howto_button.png");
     this.load.image("char_sad", "assets/char/char_sad.png");
     this.load.image("char_teach", "assets/char/char_teach.png");
     this.load.image("char_normal", "assets/char/char_normal.png");
@@ -71,10 +76,88 @@ class HomeScene extends Phaser.Scene {
     this.load.image("help_button", "assets/ui/help_button.png");
     this.load.image("help_panel", "assets/ui/help_panel.png");
     this.load.image("complete", "assets/ui/complete.png");
+    this.load.video("battery_fire", "assets/video/battery_fire.mp4", true);
   }
+
+  openHowtoPopup(isFirst = false) {
+
+    // 暗幕
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(300)
+      .setInteractive();
+
+    // ページ1
+    const page1 = this.add.image(400, 300, "howto_page1")
+      .setDepth(301)
+      .setScale(0.6);
+
+    // 右矢印
+    const arrowRight = this.add.image(730, 300, "arrow_right")
+      .setDepth(302)
+      .setScale(0.3)
+      .setInteractive({ useHandCursor: true });
+
+    // ページ2（非表示）
+    const page2 = this.add.image(400, 300, "howto_page2")
+      .setDepth(301)
+      .setScale(0.6)
+      .setVisible(false);
+
+    // 左矢印（非表示）
+    const arrowLeft = this.add.image(70, 300, "arrow_left")
+      .setDepth(302)
+      .setScale(0.3)
+      .setVisible(false)
+      .setInteractive({ useHandCursor: true });
+
+    // ページ切替
+    arrowRight.on("pointerdown", () => {
+      page1.setVisible(false);
+      arrowRight.setVisible(false);
+      page2.setVisible(true);
+      arrowLeft.setVisible(true);
+    });
+
+    arrowLeft.on("pointerdown", () => {
+      page2.setVisible(false);
+      arrowLeft.setVisible(false);
+      page1.setVisible(true);
+      arrowRight.setVisible(true);
+    });
+
+    // パネル内は閉じない
+    page1.on("pointerdown", e => e.stopPropagation());
+    page2.on("pointerdown", e => e.stopPropagation());
+    arrowLeft.on("pointerdown", e => e.stopPropagation());
+    arrowRight.on("pointerdown", e => e.stopPropagation());
+
+
+    // 暗幕クリックで閉じる
+    dim.on("pointerdown", () => {
+
+      dim.destroy();
+      page1.destroy();
+      page2.destroy();
+      arrowLeft.destroy();
+      arrowRight.destroy();
+
+      // 初回の場合はローカルストレージに記録する
+      if (isFirst) {
+        localStorage.setItem("howtoSeen", "true");
+      }
+    });
+  }
+
 
   create() {
 
+    // 初回起動チェック
+    const seen = localStorage.getItem("howtoSeen");
+    if (!seen) {
+      this.time.delayedCall(300, () => {
+        this.openHowtoPopup(true); // 初回表示であることを渡す
+      });
+    }
 
     //メニューボタン
     const menuBtn = this.add.image(760, 40, 'menu_button')
@@ -212,9 +295,9 @@ class HomeScene extends Phaser.Scene {
       .setInteractive()
       .setDepth(201);
     // 分別チャレンジ
-    const btnChallenge = this.add.text(320, 260, "分別チャレンジ", {
-      fontSize: "24px",
-      color: "#444",
+    const btnChallenge = this.add.text(310, 225, "● 分別チャレンジ", {
+      fontSize: "22px",
+      color: "#00796b",
       padding: { top: 10, bottom: 0 }
     }).setInteractive({ useHandCursor: true }).setDepth(202);
 
@@ -223,9 +306,9 @@ class HomeScene extends Phaser.Scene {
     });
 
     // アイテム一覧
-    const btnItems = this.add.text(320, 320, "アイテム一覧", {
-      fontSize: "24px",
-      color: "#00796b",
+    const btnItems = this.add.text(310, 285 ,"● アイテム一覧", {
+      fontSize: "22px",
+      color: "#444",
       padding: { top: 10, bottom: 0 }
     }).setInteractive({ useHandCursor: true }).setDepth(202);
 
@@ -233,12 +316,28 @@ class HomeScene extends Phaser.Scene {
       this.scene.start('ItemScene');
     });
 
+    // あそびかた（テキスト形式）
+    const btnHowTo = this.add.text(310, 345, "● あそびかた", {
+      fontSize: "22px",
+      color: "#444",
+      padding: { top: 10, bottom: 0 }
+    })
+      .setInteractive({ useHandCursor: true })
+      .setDepth(202);
+
+    // クリック → HomeScene の遊び方ポップアップを開く
+    btnHowTo.on("pointerdown", () => {
+      this.openHowtoPopup(false); // false = 初回じゃない
+    });
+
+
     // 背景クリックで閉じる
     bg.on('pointerdown', () => {
       bg.destroy();
       panel.destroy();
       btnChallenge.destroy();
       btnItems.destroy();
+      btnHowTo.destroy();
     });
 
 
@@ -275,99 +374,10 @@ class StartScene extends Phaser.Scene {
     this.load.image('cloth', 'assets/trash/cloth.png');
     this.load.image('battery', 'assets/trash/battery.png');
     this.load.image('handyfan', 'assets/trash/handyfan.png');
-    this.load.image("howto_page1", "assets/ui/howto_page1.png");
-    this.load.image("howto_page2", "assets/ui/howto_page2.png");
-    this.load.image("arrow_left", "assets/ui/arrow_left.png");
-    this.load.image("arrow_right", "assets/ui/arrow_right.png");
-    this.load.image("howto_button", "assets/ui/howto_button.png");
+
   }
-  openHelpPopup() {
-    // 暗幕
-    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
-      .setDepth(200)
-      .setInteractive();
-
-    // パネル
-    const panel = this.add.image(400, 300, "help_panel")
-      .setDepth(201)
-      .setScale(0.6);
-
-    // 暗幕をクリックで閉じる
-    dim.on("pointerdown", () => {
-      dim.destroy();
-      panel.destroy();
-    });
-  }
-  openHowtoPopup() {
-
-    //暗幕
-    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
-      .setDepth(200)
-      .setInteractive();
-
-    //ページ1
-    const page1 = this.add.image(400, 300, "howto_page1")
-      .setDepth(201)
-      .setScale(0.6);
-
-    //右矢印ページ２へ
-    const arrowRight = this.add.image(730, 300, "arrow_right")
-      .setDepth(202)
-      .setScale(0.3)
-      .setInteractive({ useHandCursor: true });
-
-    //ページ２最初は非表示
-    const page2 = this.add.image(400, 300, "howto_page2")
-      .setDepth(201)
-      .setScale(0.6)
-      .setVisible(false);
-
-    //左矢印ページ１へ、最初は非表示
-    const arrowLeft = this.add.image(70, 300, "arrow_left")
-      .setDepth(202)
-      .setScale(0.3)
-      .setVisible(false)
-      .setInteractive({ useHandCursor: true });
 
 
-    //右矢印：ページ２
-
-    arrowRight.on("pointerdown", () => {
-      page1.setVisible(false);
-      arrowRight.setVisible(false);
-
-      page2.setVisible(true);
-      arrowLeft.setVisible(true);
-    });
-
-
-    //左矢印：ページ１に戻る
-
-    arrowLeft.on("pointerdown", () => {
-      page2.setVisible(false);
-      arrowLeft.setVisible(false);
-
-      page1.setVisible(true);
-      arrowRight.setVisible(true);
-    });
-
-
-    //　暗幕クリックでポップアップ閉じる
-
-    dim.on("pointerdown", () => {
-      dim.destroy();
-      page1.destroy();
-      page2.destroy();
-      arrowLeft.destroy();
-      arrowRight.destroy();
-    });
-
-    // パネル内クリックは閉じない
-    page1.on("pointerdown", e => e.stopPropagation());
-    page2.on("pointerdown", e => e.stopPropagation());
-    arrowLeft.on("pointerdown", e => e.stopPropagation());
-    arrowRight.on("pointerdown", e => e.stopPropagation());
-  }
 
   create() {
 
@@ -420,57 +430,8 @@ class StartScene extends Phaser.Scene {
       this.difficultyButtons.push(btn);
       y += 50;
     }
-
     // 初期マーク表示
     this.showDifficultyMark(this.difficultyButtons[0]);
-
-    // ヘルプボタン
-    const helpBtn = this.add.image(760, 35, "help_button")
-      .setDepth(30)
-      .setScale(0.15)
-      .setInteractive({ useHandCursor: true });
-
-    //ホバー
-    helpBtn.on("pointerover", () => {
-      this.tweens.add({ targets: helpBtn, scale: 0.17, duration: 120 });
-    });
-    helpBtn.on("pointerout", () => {
-      this.tweens.add({ targets: helpBtn, scale: 0.15, duration: 120 });
-    });
-
-    helpBtn.on("pointerdown", () => {
-      this.openHelpPopup();
-    });
-
-    //あそびかたボタン
-    const howtoBtn = this.add.image(490, 206, "howto_button")
-      .setInteractive({ useHandCursor: true })
-      .setScale(0.66);
-
-    // ホバー演出
-    howtoBtn.on("pointerover", () => {
-      this.tweens.add({
-        targets: howtoBtn,
-        scale: 0.76,
-        duration: 120
-      });
-    });
-    howtoBtn.on("pointerout", () => {
-      this.tweens.add({
-        targets: howtoBtn,
-        scale: 0.66,
-        duration: 120
-      });
-    });
-
-
-    howtoBtn.on("pointerdown", () => {
-      this.openHowtoPopup();
-
-
-
-
-    });
 
 
     // 戻るボタン
@@ -587,7 +548,7 @@ class GameScene extends Phaser.Scene {
     this.load.image("nice", "assets/ui/nice.png");
     this.load.image("perfect", "assets/ui/perfect.png");
     this.load.image("char_frame", "assets/ui/char_frame.png");
-    this.load.image("help_button_locked", "assets/ui/help_button_locked.png");
+
   }
 
   init(data) {
@@ -596,28 +557,6 @@ class GameScene extends Phaser.Scene {
     this.settings = DIFFICULTY_SETTINGS[this.difficultyKey];
   }
 
-  openHelpPopup() {
-
-    // 暗幕（ポップアップ中もゲーム進行のため入力だけ取る）
-    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
-      .setDepth(200)
-      .setInteractive();   // クリックを
-
-    // パネル画像（分別表）
-    const panel = this.add.image(400, 300, "help_panel")
-      .setDepth(201)
-      .setScale(0.6)
-    //.setInteractive();  //パネルクリックで閉じないようブロック
-
-    // パネル内クリックは閉じない
-    panel.on("pointerdown", (e) => e.stopPropagation());
-
-    // 暗幕クリックで閉じる
-    dim.on("pointerdown", () => {
-      dim.destroy();
-      panel.destroy();
-    });
-  }
 
 
 
@@ -644,11 +583,11 @@ class GameScene extends Phaser.Scene {
     // 吹き出し
     this.bubble = this.add.image(540, 60, "bubble")
       .setDepth(103)
-      .setScale(0.36)
+      .setScale(0.38)
       .setVisible(false);
 
-    this.bubbleText = this.add.text(460, 38, "", {
-      fontSize: "14px",
+    this.bubbleText = this.add.text(452, 38, "", {
+      fontSize: "16px",
       color: "#000",
       fontStyle: "bold",
       wordWrap: { width: 140 },
@@ -703,39 +642,8 @@ class GameScene extends Phaser.Scene {
 
     this.timeLimit = 40;
     this.timerText = this.add.text(20, 20, "時間: 40", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
-    this.scoreText = this.add.text(180, 20, "スコア: 0", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
+    this.scoreText = this.add.text(660, 20, "スコア: 0", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
 
-    // ？ボタン
-    // 難易度に応じてヘルプボタンを変更
-    if (this.difficultyKey === "easy") {
-
-      // ◆ かんたん：使えるヘルプボタン
-      this.helpBtn = this.add.image(760, 35, "help_button")
-        .setDepth(110)
-        .setScale(0.15)
-        .setInteractive({ useHandCursor: true });
-
-      // ホバー演出
-      this.helpBtn.on("pointerover", () => {
-        this.tweens.add({ targets: this.helpBtn, scale: 0.17, duration: 120 });
-      });
-      this.helpBtn.on("pointerout", () => {
-        this.tweens.add({ targets: this.helpBtn, scale: 0.15, duration: 120 });
-      });
-
-      //クリックでヘルプポップアップ
-      this.helpBtn.on("pointerdown", () => {
-        this.openHelpPopup();
-      });
-
-    } else {
-
-      // ◆ ふつう・むずかしいはロックされたボタン
-      this.helpBtnLocked = this.add.image(760, 35, "help_button_locked")
-        .setDepth(110)
-        .setScale(0.2);
-
-    }
 
 
     // 分別エリア数を難易度に応じて制限
@@ -1407,7 +1315,23 @@ class ResultScene extends Phaser.Scene {
 
 
 
+  openHelpPopup() {
+    // 暗幕
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(200)
+      .setInteractive();
 
+    // パネル
+    const panel = this.add.image(400, 300, "help_panel")
+      .setDepth(201)
+      .setScale(0.6);
+
+    // 暗幕をクリックで閉じる
+    dim.on("pointerdown", () => {
+      dim.destroy();
+      panel.destroy();
+    });
+  }
 
 
 
@@ -1471,6 +1395,7 @@ class ResultScene extends Phaser.Scene {
 
     let y = 220;
 
+
     for (let i = 0; i < 3; i++) {
 
       // ゲージを描画
@@ -1483,6 +1408,24 @@ class ResultScene extends Phaser.Scene {
 
       y += 70;
     }
+    //正しい分別表
+    this.helpBtn = this.add.image(760, 35, "help_button")
+
+      .setScale(0.15)
+      .setInteractive({ useHandCursor: true });
+
+    // ホバー演出
+    this.helpBtn.on("pointerover", () => {
+      this.tweens.add({ targets: this.helpBtn, scale: 0.17, duration: 120 });
+    });
+    this.helpBtn.on("pointerout", () => {
+      this.tweens.add({ targets: this.helpBtn, scale: 0.15, duration: 120 });
+    });
+
+    //クリックでヘルプポップアップ
+    this.helpBtn.on("pointerdown", () => {
+      this.openHelpPopup();
+    });
 
     // タイトルに戻るボタン
     const backBtn = this.add.image(400, 450, "back_button")
@@ -1843,7 +1786,7 @@ class FireScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.video("battery_fire", "assets/video/battery_fire.mp4", true);
+
 
   }
 
