@@ -1,5 +1,162 @@
-
 //定義データ
+const SORT_TABLE = {
+  "魚の骨": {
+    "普通ごみ": true,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "靴": {
+    "普通ごみ": true,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "皿": {
+    "普通ごみ": true,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "グローブ": {
+    "普通ごみ": true,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "メガネ": {
+    "普通ごみ": true,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "缶": {
+    "普通ごみ": false,
+    "資源ごみ": true,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "ビン": {
+    "普通ごみ": false,
+    "資源ごみ": true,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "ペットボトル": {
+    "普通ごみ": false,
+    "資源ごみ": true,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "カップ麺の容器": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": true,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "パック": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": true,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "タッパー": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": true,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "ペットボトルのキャップ": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": true,
+    "古紙衣類": false,
+    "バッテリー類": false
+  },
+  "新聞紙": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": true,
+    "バッテリー類": false
+  },
+  "段ボール": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": true,
+    "バッテリー類": false
+  },
+  "紙パック": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": true,
+    "バッテリー類": false
+  },
+  "衣類": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": true,
+    "バッテリー類": false
+  },
+  "バッテリー": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": true
+  },
+  "ハンディファン": {
+    "普通ごみ": false,
+    "資源ごみ": false,
+    "プラスチック資源": false,
+    "古紙衣類": false,
+    "バッテリー類": true
+  },
+
+};
+
+(() => {
+  const savedSortTable = localStorage.getItem("sortTable");
+  if (!savedSortTable) return;
+
+  try {
+    const parsed = JSON.parse(savedSortTable);
+    Object.keys(parsed).forEach(itemName => {
+      if (!SORT_TABLE[itemName]) {
+        SORT_TABLE[itemName] = {};
+      }
+      Object.keys(parsed[itemName]).forEach(category => {
+        SORT_TABLE[itemName][category] = !!parsed[itemName][category];
+      });
+    });
+    console.log("SORT_TABLE loaded from localStorage:", SORT_TABLE);
+  } catch (e) {
+    console.warn("Failed to load sortTable from localStorage", e);
+  }
+})();
+
+const TEXTURE_TO_ITEM_NAME = {
+  fishbone: "魚の骨", shoe: "靴", plate: "皿",
+  glove: "グローブ", glasses: "メガネ",
+  can: "缶", bottle: "ビン", petbottle: "ペットボトル",
+  cupramen: "カップ麺の容器", pack: "パック", tupper: "タッパー", cap: "キャップ",
+  newspaper: "新聞紙", cardboard: "段ボール", kamipack: "紙パック", cloth: "衣類",
+  battery: "バッテリー", handyfan: "ハンディファン"
+};
 
 const CATEGORIES = [
   "普通ごみ",
@@ -9,13 +166,27 @@ const CATEGORIES = [
   "バッテリー類"
 ];
 
-const ITEMS = {
-  "普通ごみ": ["魚の骨", "靴", "皿", "グローブ", "メガネ"],
-  "資源ごみ": ["缶", "ビン", "ペットボトル"],
-  "プラスチック資源": ["カップ麺の容器", "パック", "タッパー", "ペットボトルのキャップ"],
-  "古紙衣類": ["新聞紙", "段ボール", "紙パック", "衣類"],
-  "バッテリー類": ["バッテリー", "ハンディファン"]
-};
+const ITEMS = [
+  "魚の骨",
+  "靴",
+  "皿",
+  "グローブ",
+  "メガネ",
+  "缶",
+  "ビン",
+  "ペットボトル",
+  "カップ麺の容器",
+  "パック",
+  "タッパー",
+  "ペットボトルのキャップ",
+  "新聞紙",
+  "段ボール",
+  "紙パック",
+  "衣類",
+  "バッテリー",
+  "ハンディファン"
+];
+
 //難易度設定
 const DIFFICULTY_SETTINGS = {
   easy: { label: "かんたん", speedMultiplier: 1.0, categories: 3, spawnRate: 3500, missPoint: -2 },
@@ -32,12 +203,35 @@ let score = 0;
 
 //リサイクルゲージ集計
 let recycleCounts = {
-  pet: 0,      // ペットボトル
-  can: 0,      // 缶
-  bottle: 0,   // ビン
+  pet: 0,
+  can: 0,
+  bottle: 0,
 };
 //所持アイテムデータ
 let ownedItems = JSON.parse(localStorage.getItem("ownedItems")) || [];
+
+// ★ 現在の SORT_TABLE から「カテゴリ → 出現させる画像キー一覧」を作る
+function buildItemsByCategoryFromSortTable() {
+  const result = {};
+  CATEGORIES.forEach(cat => {
+    result[cat] = [];
+  });
+
+  // TEXTURE_TO_ITEM_NAME で全ゴミ画像を走査
+  Object.entries(TEXTURE_TO_ITEM_NAME).forEach(([textureKey, itemName]) => {
+    const row = SORT_TABLE[itemName];
+    if (!row) return;
+
+    CATEGORIES.forEach(cat => {
+      if (row[cat]) {
+        result[cat].push(textureKey);
+      }
+    });
+  });
+
+  return result;
+}
+
 
 class HomeScene extends Phaser.Scene {
   constructor() {
@@ -45,6 +239,12 @@ class HomeScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image('can', 'assets/trash/can.png');
+    this.load.image('bottle', 'assets/trash/bottle.png');
+    this.load.image('petbottle', 'assets/trash/petbottle.png');
+    this.load.audio("button_click", "assets/se/button_click.mp3");
+    this.load.image("set_button", "assets/ui/set_button.png");
+    this.load.image("jersey_home", "assets/ui/jersey_home.png");
     this.load.image("howto_page1", "assets/ui/howto_page1.png");
     this.load.image("howto_page2", "assets/ui/howto_page2.png");
     this.load.image("arrow_left", "assets/ui/arrow_left.png");
@@ -112,6 +312,7 @@ class HomeScene extends Phaser.Scene {
 
     // ページ切替
     arrowRight.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
       page1.setVisible(false);
       arrowRight.setVisible(false);
       page2.setVisible(true);
@@ -119,6 +320,7 @@ class HomeScene extends Phaser.Scene {
     });
 
     arrowLeft.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
       page2.setVisible(false);
       arrowLeft.setVisible(false);
       page1.setVisible(true);
@@ -165,10 +367,6 @@ class HomeScene extends Phaser.Scene {
       .setScale(0.3)
       .setDepth(20);
 
-
-
-
-
     //ホバー
     menuBtn.on("pointerover", () => {
       this.tweens.add({
@@ -178,7 +376,6 @@ class HomeScene extends Phaser.Scene {
         ease: "Sine.easeOut"
       });
     });
-
     //ホバー解除
     menuBtn.on("pointerout", () => {
       this.tweens.add({
@@ -188,10 +385,14 @@ class HomeScene extends Phaser.Scene {
         ease: "Sine.easeOut"
       });
     });
-
     menuBtn.on('pointerdown', () => {
       this.openMenuPopup();
+      this.sound.play("button_click", { volume: 0.6 });
     });
+
+
+
+
 
 
 
@@ -251,7 +452,10 @@ class HomeScene extends Phaser.Scene {
       "cup",
       "glass_juice",
       "pet_juice",
-      "rucksack"
+      "rucksack",
+      "jersey",
+      "ruler",
+      "bead"
     ];
 
     const ITEM_POS = {
@@ -261,7 +465,10 @@ class HomeScene extends Phaser.Scene {
       cup: { x: 463, y: 513, scale: 0.11 },
       glass_juice: { x: 500, y: 478, scale: 0.14 },
       pet_juice: { x: 530, y: 489, scale: 0.14 },
-      rucksack: { x: 670, y: 500, scale: 0.2 }
+      rucksack: { x: 670, y: 500, scale: 0.2 },
+      jersey: { x: 360, y: 280, scale: 0.27 },
+      ruler: { x: 650, y: 520, scale: 0.12 },
+      bead: { x: 290, y: 580, scale: 0.07 }
     };
 
 
@@ -271,8 +478,12 @@ class HomeScene extends Phaser.Scene {
       if (!owned.includes(key)) continue;
 
       // テクスチャ名の変換
-      const texture = (key === "bike") ? "bike_home" : key;
-
+      let texture = key;
+      if (key === "bike") {
+        texture = "bike_home";
+      } else if (key === "jersey") {
+        texture = "jersey_home"; // ← スペル注意！
+      }
       const p = ITEM_POS[key];
 
       // depth は必要に応じて統一した数値（3など）で描画
@@ -302,21 +513,23 @@ class HomeScene extends Phaser.Scene {
     }).setInteractive({ useHandCursor: true }).setDepth(202);
 
     btnChallenge.on('pointerdown', () => {
+      this.sound.play("button_click", { volume: 0.6 });
       this.scene.start('StartScene');
     });
 
     // アイテム一覧
-    const btnItems = this.add.text(310, 285 ,"● アイテム一覧", {
+    const btnItems = this.add.text(310, 285, "● アイテム一覧", {
       fontSize: "22px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
     }).setInteractive({ useHandCursor: true }).setDepth(202);
 
     btnItems.on('pointerdown', () => {
+      this.sound.play("button_click", { volume: 0.6 });
       this.scene.start('ItemScene');
     });
 
-    // あそびかた（テキスト形式）
+    // あそびかた
     const btnHowTo = this.add.text(310, 345, "● あそびかた", {
       fontSize: "22px",
       color: "#444",
@@ -325,9 +538,25 @@ class HomeScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true })
       .setDepth(202);
 
-    // クリック → HomeScene の遊び方ポップアップを開く
+
     btnHowTo.on("pointerdown", () => {
-      this.openHowtoPopup(false); // false = 初回じゃない
+      this.sound.play("button_click", { volume: 0.6 });
+      this.openHowtoPopup(false); // false = 初回ではない
+
+    });
+
+    const btnSet = this.add.text(505, 365, "[設定]", {
+      fontSize: "13px",
+      color: "#444",
+      padding: { top: 10, bottom: 0 }
+    })
+      .setInteractive({ useHandCursor: true })
+      .setDepth(202);
+
+
+    btnSet.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
+      this.scene.start('SetScene');
     });
 
 
@@ -338,6 +567,7 @@ class HomeScene extends Phaser.Scene {
       btnChallenge.destroy();
       btnItems.destroy();
       btnHowTo.destroy();
+      btnSet.destroy();
     });
 
 
@@ -361,9 +591,7 @@ class StartScene extends Phaser.Scene {
     this.load.image('plate', 'assets/trash/plate.png');
     this.load.image('glove', 'assets/trash/glove.png');
     this.load.image('glasses', 'assets/trash/glasses.png');
-    this.load.image('can', 'assets/trash/can.png');
-    this.load.image('bottle', 'assets/trash/bottle.png');
-    this.load.image('petbottle', 'assets/trash/petbottle.png');
+
     this.load.image('cupramen', 'assets/trash/cupramen.png');
     this.load.image('pack', 'assets/trash/pack.png');
     this.load.image('tupper', 'assets/trash/tupper.png');
@@ -377,9 +605,48 @@ class StartScene extends Phaser.Scene {
 
   }
 
+  openHelpPopup() {
+    // 暗幕
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(200)
+      .setInteractive();
+
+    // パネル
+    const panel = this.add.image(400, 300, "help_panel")
+      .setDepth(201)
+      .setScale(0.6);
+
+    // 暗幕をクリックで閉じる
+    dim.on("pointerdown", () => {
+      dim.destroy();
+      panel.destroy();
+    });
+  }
+
 
 
   create() {
+
+    //正しい分別表
+    this.helpBtn = this.add.image(760, 35, "help_button")
+      .setDepth(100)
+
+      .setScale(0.15)
+      .setInteractive({ useHandCursor: true });
+
+    // ホバー演出
+    this.helpBtn.on("pointerover", () => {
+      this.tweens.add({ targets: this.helpBtn, scale: 0.17, duration: 120 });
+    });
+    this.helpBtn.on("pointerout", () => {
+      this.tweens.add({ targets: this.helpBtn, scale: 0.15, duration: 120 });
+    });
+
+    //クリックでヘルプポップアップ
+    this.helpBtn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
+      this.openHelpPopup();
+    });
 
     currentDifficulty = "easy";
 
@@ -423,6 +690,7 @@ class StartScene extends Phaser.Scene {
       })
         .setInteractive({ useHandCursor: true })
         .on("pointerdown", () => {
+          this.sound.play("button_click", { volume: 0.6 });
           currentDifficulty = key;
           this.showDifficultyMark(btn);
         });
@@ -447,6 +715,7 @@ class StartScene extends Phaser.Scene {
         duration: 120
       });
     });
+
     backBtn.on("pointerout", () => {
       this.tweens.add({
         targets: backBtn,
@@ -457,6 +726,7 @@ class StartScene extends Phaser.Scene {
 
     // クリックでホームへ戻る
     backBtn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
       backBtn.disableInteractive();
 
       this.tweens.add({
@@ -495,6 +765,8 @@ class StartScene extends Phaser.Scene {
 
     // クリック時のズーム演出シーン
     startBtn.on('pointerdown', () => {
+
+      this.sound.play("button_click", { volume: 0.6 });
       // 二重クリック防止
       startBtn.disableInteractive();
 
@@ -548,7 +820,9 @@ class GameScene extends Phaser.Scene {
     this.load.image("nice", "assets/ui/nice.png");
     this.load.image("perfect", "assets/ui/perfect.png");
     this.load.image("char_frame", "assets/ui/char_frame.png");
-
+    this.load.audio("game_bgm", "assets/bgm/game_bgm.mp3");
+    this.load.audio("correct", "assets/se/correct.mp3");
+    this.load.audio("mistake", "assets/se/mistake.mp3");
   }
 
   init(data) {
@@ -562,7 +836,22 @@ class GameScene extends Phaser.Scene {
 
 
   create() {
-    //上部の帯状エリア
+
+
+    this.missCounts = {
+      "普通ごみ": 0,
+      "資源ごみ": 0,
+      "プラスチック資源": 0,
+      "古紙衣類": 0
+    };
+    this.bgm = this.sound.add("game_bgm", {
+      volume: 0.5,
+      loop: true
+    });
+
+    this.bgm.play();
+
+    //帯状エリア
     this.header = this.add.rectangle(400, 35, 800, 70, 0xffe0c1)
       .setDepth(100);
     //帯エリアのアウトライン
@@ -619,7 +908,7 @@ class GameScene extends Phaser.Scene {
         this.bubbleText.setVisible(false);
       }
 
-      // 一定時間後に normal へ戻す
+      // 一定時間後に通常キャラへ戻す
       this.charTimer = this.time.delayedCall(duration, () => {
         this.char.setTexture("char_normal");
         this.bubble.setVisible(false);
@@ -644,12 +933,21 @@ class GameScene extends Phaser.Scene {
     this.timerText = this.add.text(20, 20, "時間: 40", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
     this.scoreText = this.add.text(660, 20, "スコア: 0", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
 
-
+    const savedNames = localStorage.getItem("categoryNames");
+    if (savedNames) {
+      try {
+        this.categoryNames = JSON.parse(savedNames);
+      } catch (e) {
+        this.categoryNames = [...CATEGORIES];
+      }
+    } else {
+      this.categoryNames = [...CATEGORIES];
+    }
 
     // 分別エリア数を難易度に応じて制限
     const categoryCount = this.settings.categories;
     const selectedCategories = CATEGORIES.slice(0, categoryCount);
-
+    this.itemsByCategory = buildItemsByCategoryFromSortTable();
     this.trashGroup = this.add.group();
     this.dropZones = [];
 
@@ -671,14 +969,43 @@ class GameScene extends Phaser.Scene {
       const bin = this.add.image(x, y, binImages[category]).setScale(0.7);
       bin.setData("category", category);
 
+      // ★ ゴミ箱の「表示用の名前」（SetSceneで編集したもの）
+      const label = this.categoryNames[i] || category;
+
+      // ★ まずは少し大きめのサイズでテキスト作成
+      const maxFontSize = 18;
+      const minFontSize = 10;
+      const maxLabelWidth = bin.displayWidth * 0.8; // bin 幅の 80% 以内に収める
+
+      const labelText = this.add.text(
+        x,
+        y - bin.displayHeight * 0.1,
+        label,
+        {
+          fontSize: maxFontSize + "px",
+          color: "#000",
+          fontStyle: "bold",
+          align: "center",
+          // 横幅も bin に合わせておく（はみ出し防止＆日本語でもOK）
+          wordWrap: { width: maxLabelWidth },
+          padding: { top: 10, bottom: 0 }
+        }
+      ).setOrigin(0.5);
+
+      // ★ はみ出している間はフォントサイズを 1 ずつ下げる
+      let currentSize = maxFontSize;
+      while (currentSize > minFontSize && labelText.width > maxLabelWidth) {
+        currentSize -= 1;
+        labelText.setFontSize(currentSize);
+      }
+
       // ドロップ判定エリアを設定
       const zone = this.add.zone(x, y, bin.displayWidth, bin.displayHeight)
         .setRectangleDropZone(bin.displayWidth, bin.displayHeight)
         .setData("category", category);
-
-
-
     }
+
+
 
 
     // ドラッグ設定
@@ -709,7 +1036,7 @@ class GameScene extends Phaser.Scene {
           this.spawnTimer.remove(false);
           this.timerEvent.remove(false);
 
-          // 火災動画シーンへ遷移
+          // 火災シーンへ遷移
           this.scene.start("FireScene");
 
           return;
@@ -717,6 +1044,7 @@ class GameScene extends Phaser.Scene {
       }
 
       if (correct) {
+        this.sound.play("correct", { volume: 0.6 });
         // キャラクターの正解リアクション
         this.showChar("char_happy", 2000);
 
@@ -799,38 +1127,37 @@ class GameScene extends Phaser.Scene {
           onComplete: () => obj.destroy()
         });
       } else {
+        this.sound.play("mistake", { volume: 0.8 });
         this.combo = 0;
+        if (obj.category !== "バッテリー類") {
+          if (this.missCounts[obj.category] !== undefined) {
+            this.missCounts[obj.category]++;
+          }
+        }
         //　不正解リアクション
         if (this.difficultyKey === "easy") {
 
-          const wrongName = obj.texture.key;// 失敗したゴミ
-          const categoryCorrectKanji = obj.category;
+          const wrongName = obj.texture.key;   // 失敗したゴミ（texture key）
+          const categoryId = obj.category;     // 内部的な分別区分（"普通ごみ" など）
 
-          // 表示名変換
-          const DISPLAY_NAME = {
-            fishbone: "魚の骨", shoe: "靴", plate: "皿",
-            glove: "グローブ", glasses: "メガネ",
-            can: "缶", bottle: "ビン", petbottle: "ペットボトル",
-            cupramen: "カップ麺の容器", pack: "パック", tupper: "タッパー", cap: "キャップ",
-            newspaper: "新聞紙", cardboard: "段ボール", kamipack: "紙パック", cloth: "衣類",
-            battery: "バッテリー", handyfan: "ハンディファン"
-          };
-          const CATEGORY_HIRAGANA = {
-            "普通ごみ": "ふつうゴミ",
-            "資源ごみ": "しげんゴミ",
-            "プラスチック資源": "プラスチックしげん",
-            "古紙衣類": "かみ・ふく",
-            "バッテリー類": "バッテリー"
-          };
-          const showItemName = DISPLAY_NAME[wrongName] || wrongName;
-          const categoryHira = CATEGORY_HIRAGANA[categoryCorrectKanji] || categoryCorrectKanji;
+          const showItemName = TEXTURE_TO_ITEM_NAME[wrongName] || wrongName;
+
+          // ★ categoryId に対応するインデックスを CATEGORIES から探す
+          let categoryLabel = categoryId;
+          const idx = CATEGORIES.indexOf(categoryId);
+          if (idx !== -1 && this.categoryNames && this.categoryNames[idx]) {
+            // SetScene で編集された表示名
+            categoryLabel = this.categoryNames[idx];
+          }
+
           // 吹き出しテキスト
-          const message = `${showItemName}は\n${categoryHira}だよ！`;
+          const message = `${showItemName}は\n${categoryLabel}だよ！`;
 
           // 3秒間 teach 表示
           this.showChar("char_teach", 3000, message);
 
         } else {
+
 
           // normal・hard は sad を2秒表示
           this.showChar("char_sad", 2000);
@@ -861,36 +1188,60 @@ class GameScene extends Phaser.Scene {
       callback: () => {
         this.timeLimit--;
         this.timerText.setText("時間: " + this.timeLimit);
-        if (this.timeLimit <= 0) this.scene.start("ResultScene");
+        if (this.timeLimit <= 0) {
+          this.bgm.stop();
+          this.scene.start("ResultScene", {
+            missCounts: this.missCounts
+          });
+        }
       },
       loop: true
     });
 
     this.selectedCategories = selectedCategories;
+
+    //ゲームシーン終了でBGM停止
+    this.events.once("shutdown", () => {
+      if (this.bgm) {
+        this.bgm.stop();
+      }
+    });
+
   }
 
 
   spawnTrash() {
+    // 今回出すカテゴリ（ゴミ箱）をランダムに選ぶ
     const category = Phaser.Utils.Array.GetRandom(this.selectedCategories);
-    const items = {
-      "普通ごみ": ["fishbone", "shoe", "plate", "glove", "glasses"],
-      "資源ごみ": ["can", "bottle", "petbottle"],
-      "プラスチック資源": ["cupramen", "pack", "tupper", "cap"],
-      "古紙衣類": ["newspaper", "cardboard", "kamipack", "cloth"],
-      "バッテリー類": ["battery", "handyfan"]
-    };
-    const key = Phaser.Utils.Array.GetRandom(items[category]);
 
-    const y = Phaser.Math.Between(180, 400);//ゴミが出現する範囲
+    // SetScene で決めた対応をもとにしたリスト（SORT_TABLEから生成済み）
+    const dynamicItems = (this.itemsByCategory && this.itemsByCategory[category]) || [];
+
+    // ★ カスタム設定を最優先：
+    //   この区分に 1つもゴミが割り当てられていないなら、何も出さない
+    if (!dynamicItems || dynamicItems.length === 0) {
+      return;
+    }
+
+    const list = dynamicItems;
+
+    const key = Phaser.Utils.Array.GetRandom(list);
+
+    const y = Phaser.Math.Between(180, 400); // ゴミが出現する範囲
     const trash = this.add.image(50, y, key).setScale(0.4);
     trash.displayWidth = 120;
     trash.scaleY = trash.scaleX;
+
+    // ★ このゴミが「どの区分が正解か」は、ここで付けている category
     trash.category = category;
+
     trash.setInteractive({ pixelPerfect: true, draggable: true });
     this.input.setDraggable(trash);
     trash.speed = (50 + Math.random() * 30) * this.settings.speedMultiplier;
     this.trashGroup.add(trash);
   }
+
+
 
   update(time, delta) {
     const dt = delta / 1000;
@@ -911,10 +1262,13 @@ class GameScene extends Phaser.Scene {
         const text = this.add.text(trash.x, trash.y, `${miss} pt`, {
           fontSize: "30px",
           color: "#ff0000",
-          fontStyle: "bold"
+          fontStyle: "bold",
+          padding: { top: 10, bottom: 0 }
+
         })
           .setOrigin(0.5)
           .setScale(0.1);
+
 
 
         this.tweens.add({
@@ -1000,10 +1354,17 @@ class GameScene extends Phaser.Scene {
 class ResultScene extends Phaser.Scene {
 
   preload() {
+    this.load.audio("box", "assets/se/box.mp3");
+    this.load.audio("itempop", "assets/se/itempop.mp3");
     this.load.image("recycle_box", "assets/ui/recycle_box.png");
     this.load.image("best_update", "assets/char/best_update.png");
     this.load.image("spark", "assets/effects/spark.png");
     this.load.image("text_get", "assets/ui/text_get.png");
+    this.load.image("reflect_normal", "assets/ui/reflect_normal.png");
+    this.load.image("reflect_recycle", "assets/ui/reflect_recycle.png");
+    this.load.image("reflect_plastic", "assets/ui/reflect_plastic.png");
+    this.load.image("reflect_paper", "assets/ui/reflect_paper.png");
+    this.load.image("reflect_perfect", "assets/ui/reflect_perfect.png");
   }
 
   constructor() {
@@ -1095,6 +1456,7 @@ class ResultScene extends Phaser.Scene {
       alpha: 0.55,
       duration: 200
     });
+    this.sound.play("box", { volume: 0.6 });
 
 
     // 宝箱表示
@@ -1126,6 +1488,7 @@ class ResultScene extends Phaser.Scene {
 
 
   spawnTreasureItem() {
+    this.sound.play("itempop", { volume: 0.6 });
 
     // 宝箱削除
     if (this.box && !this.box.destroyed) {
@@ -1178,6 +1541,7 @@ class ResultScene extends Phaser.Scene {
             onComplete: () => {
               this.dimLayer.setVisible(false);
               this.dimLayer.disableInteractive();
+
             }
           });
         });
@@ -1242,6 +1606,7 @@ class ResultScene extends Phaser.Scene {
       .setDepth(33)
       .setScale(0);
 
+
     this.tweens.add({
       targets: this.textGet,
       scale: { from: 0, to: 0.7 },
@@ -1271,6 +1636,8 @@ class ResultScene extends Phaser.Scene {
             onComplete: () => {
               this.dimLayer.setVisible(false);
               this.dimLayer.disableInteractive();
+              //「ふりかえり」の演出
+              this.showReflectionPopup();
             }
           });
         });
@@ -1278,9 +1645,6 @@ class ResultScene extends Phaser.Scene {
     });
 
   }
-
-
-
 
 
 
@@ -1333,10 +1697,72 @@ class ResultScene extends Phaser.Scene {
     });
   }
 
+  init(data) {
+    this.missCounts = data.missCounts || {
+      "普通ごみ": 0,
+      "資源ごみ": 0,
+      "プラスチック資源": 0,
+      "古紙衣類": 0
+    };
+    this.REFLECT_IMAGES = {
+      "普通ごみ": "reflect_normal",
+      "資源ごみ": "reflect_recycle",
+      "プラスチック資源": "reflect_plastic",
+      "古紙衣類": "reflect_paper",
+      "none": "reflect_perfect"
+    };
+  }
 
+  showReflectionPopup() {
+    const category = this.getMostMissCategory();
+    const key = category
+      ? this.REFLECT_IMAGES[category]
+      : this.REFLECT_IMAGES.none;
+
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(300)
+      .setInteractive();
+
+    const img = this.add.image(400, 300, key)
+      .setDepth(301)
+      .setScale(0.7);
+
+    dim.on("pointerdown", () => {
+      dim.destroy();
+      img.destroy();
+    });
+  }
+
+  getMostMissCategory() {
+    let max = 0;
+    let result = null;
+
+    for (const key of [
+      "普通ごみ",
+      "資源ごみ",
+      "プラスチック資源",
+      "古紙衣類"
+    ]) {
+      const v = this.missCounts[key];
+      if (v > max) {
+        max = v;
+        result = key;
+      }
+    }
+
+    return max === 0 ? null : result;
+  }
 
 
   create() {
+    const MISS_PRIORITY = [
+      "普通ごみ",
+      "資源ごみ",
+      "プラスチック資源",
+      "古紙衣類"
+    ];
+
+
 
 
     this.add.image(400, 300, 'result_bg').setDisplaySize(800, 600);
@@ -1365,7 +1791,8 @@ class ResultScene extends Phaser.Scene {
     this.add.text(442, 157, `${bestScore}`, {
       fontSize: '22px',
       color: '#000',
-      fontStyle: "bold"
+      fontStyle: "bold",
+      padding: { top: 10, bottom: 0 }
     });
 
     // 更新していたら演出
@@ -1424,6 +1851,7 @@ class ResultScene extends Phaser.Scene {
 
     //クリックでヘルプポップアップ
     this.helpBtn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
       this.openHelpPopup();
     });
 
@@ -1454,6 +1882,7 @@ class ResultScene extends Phaser.Scene {
 
     // 押し込みシーン遷移
     backBtn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
 
       backBtn.disableInteractive();
       // ベストスコア更新保存
@@ -1534,9 +1963,12 @@ class ResultScene extends Phaser.Scene {
     if (this.fullGauges.length > 0) {
       this.currentIndex = 0;
       this.showTreasureAnimation();
+    } else {
+
+      this.time.delayedCall(1500, () => {
+        this.showReflectionPopup();
+      });
     }
-
-
 
 
 
@@ -1551,10 +1983,35 @@ class ItemScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("item_help", "assets/ui/item_help.png");
     this.load.image("item_bg", "assets/backgrounds/item_bg.png");
     this.load.image("item_frame", "assets/ui/item_frame.png");
     this.load.image("desc_frame", "assets/ui/desc_frame.png");
+    this.load.image("recycling_arrow", "assets/ui/recycling_arrow.png");
   }
+  // ★ チュートリアル画像を表示（暗幕なし）
+  showItemHelpOverlay() {
+    this.itemHelpActive = true;
+
+    this.itemHelpImg = this.add.image(480, 300, "item_help")
+      .setDepth(61)
+      .setScale(0.5);
+  }
+
+  // ★ チュートリアル画像を消す
+  hideItemHelpOverlay() {
+    if (!this.itemHelpActive) return;
+    this.itemHelpActive = false;
+
+    if (this.itemHelpImg) {
+      this.itemHelpImg.destroy();
+      this.itemHelpImg = null;
+    }
+
+    // もう見たことを保存
+    localStorage.setItem("itemHelpShown", "true");
+  }
+
 
   create() {
     this.add.image(400, 300, "item_bg").setDisplaySize(800, 600).setDepth(0);
@@ -1565,7 +2022,6 @@ class ItemScene extends Phaser.Scene {
       padding: { top: 10, bottom: 0 }
 
     });
-
     //アイテム一覧取得
     ownedItems = JSON.parse(localStorage.getItem("ownedItems")) || [];
 
@@ -1583,6 +2039,9 @@ class ItemScene extends Phaser.Scene {
       const gapY = 140;
       let index = 0;
 
+      // ★ アイテム一覧のフレームをまとめて持っておく（必要なら）
+      this.itemFrames = [];
+
       ownedItems.forEach(id => {
         const col = index % 4;
         const row = Math.floor(index / 4);
@@ -1597,18 +2056,29 @@ class ItemScene extends Phaser.Scene {
           .setInteractive({ useHandCursor: true });
 
         frame.itemId = id;
+        this.itemFrames.push(frame);
 
         // アイテム画像
         const icon = this.add.image(x, y, id)
           .setScale(0.17)
           .setDepth(11);
 
-        // クリックでポップアップ
-        frame.on("pointerdown", () => this.showPopup(id));
-
+        // ★ クリックでポップアップ（＆チュートリアルが出ていたら閉じる）
+        frame.on("pointerdown", () => {
+          if (this.itemHelpActive) {
+            this.hideItemHelpOverlay();
+          }
+          this.showPopup(id);
+        });
 
         index++;
       });
+
+      // ★ 条件を満たしていれば、チュートリアルを一度だけ表示
+      const helpShown = localStorage.getItem("itemHelpShown") === "true";
+      if (!helpShown && ownedItems.length > 0) {
+        this.showItemHelpOverlay();
+      }
     }
 
     // 戻るボタン
@@ -1636,6 +2106,7 @@ class ItemScene extends Phaser.Scene {
 
     // クリックでホームへ戻る
     backBtn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
       backBtn.disableInteractive();
 
       this.tweens.add({
@@ -1653,6 +2124,23 @@ class ItemScene extends Phaser.Scene {
   }
 
   showPopup(id) {
+    const RECYCLE_SOURCE_TEXTURE = {
+      // PETボトル系アイテム
+      pet_juice: "petbottle",
+      rucksack: "petbottle",
+      ruler: "petbottle",
+      jersey: "petbottle",
+
+      // 缶からリサイクルされたアイテム
+      fan: "can",
+      bike: "can",
+      clock: "can",
+
+      // ビンからリサイクルされたアイテム
+      glass_juice: "bottle",
+      bead: "bottle",
+      cup: "bottle"
+    };
 
     //暗幕
     const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
@@ -1669,6 +2157,25 @@ class ItemScene extends Phaser.Scene {
     const img = this.add.image(400, 220, id)
       .setDepth(52)
       .setScale(0.35);
+    // ★ リサイクル元の資源ごみ画像
+    const srcKey = RECYCLE_SOURCE_TEXTURE[id];
+    let srcImg = null;
+
+
+    if (srcKey) {
+      // アイテム画像の左側に配置
+      srcImg = this.add.image(240, 150, srcKey)
+        .setDepth(52)
+        .setScale(0.13);
+
+
+
+    }
+    let reImg = null;
+    reImg = this.add.image(265, 220, "recycling_arrow").setDisplaySize(800, 600).setDepth(52).setScale(0.28);
+
+
+
 
 
 
@@ -1765,10 +2272,13 @@ class ItemScene extends Phaser.Scene {
       dim.destroy();
       panel.destroy();
       img.destroy();
+      reImg.destroy();
+
       baseText.destroy();
       descFrame.destroy();
       if (linkLabel) linkLabel.destroy();
       if (linkText) linkText.destroy();
+      if (srcImg) srcImg.destroy();
     });
 
 
@@ -1829,6 +2339,7 @@ class FireScene extends Phaser.Scene {
     });
 
     btn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
       btn.disableInteractive();
 
       this.tweens.add({
@@ -1844,6 +2355,343 @@ class FireScene extends Phaser.Scene {
     });
   }
 }
+class SetScene extends Phaser.Scene {
+  constructor() {
+    super("SetScene");
+  }
+  saveSortTableToLocalStorage() {
+    try {
+      // SORT_TABLE 全体をそのまま JSON 化して保存
+      localStorage.setItem("sortTable", JSON.stringify(SORT_TABLE));
+      console.log("sortTable saved:", SORT_TABLE);
+    } catch (e) {
+      console.warn("Failed to save sortTable", e);
+    }
+  }
+
+  preload() {
+    this.load.image("set_bg", "assets/backgrounds/set_bg.png");
+    this.load.image("back_button", "assets/ui/back_button.png");
+  }
+
+  // ★ 「◯」切り替え
+  toggleCell(item, category) {
+    if (!SORT_TABLE[item]) SORT_TABLE[item] = {};
+    if (!this.circleTexts[item]) this.circleTexts[item] = {};
+
+    CATEGORIES.forEach(cat => {
+      const isSelected = (cat === category);
+      // データ更新
+      SORT_TABLE[item][cat] = isSelected;
+      // 表示更新
+      const textObj = this.circleTexts[item][cat];
+      if (textObj) {
+        textObj.setText(isSelected ? "◯" : "");
+      }
+    });
+  }
+
+  // ★ 区分名編集用（ダブルクリックで呼ばれる）
+  startEditCategory(colIndex, textObj) {
+    // 既に別の入力欄があれば消す
+    if (this.editInput) {
+      this.editInput.remove();
+      this.editInput = null;
+    }
+
+    const oldLabel =
+      (this.categoryNames && this.categoryNames[colIndex]) ||
+      CATEGORIES[colIndex];
+
+    const canvas = this.game.canvas;
+    const canvasRect = canvas.getBoundingClientRect();
+    const bounds = textObj.getBounds(); // ゲーム座標上の矩形
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = oldLabel;
+    input.maxLength = 20; // お好みで
+    Object.assign(input.style, {
+      position: "absolute",
+      left: canvasRect.left + bounds.x + "px",
+      top: canvasRect.top + bounds.y + "px",
+      width: bounds.width + 20 + "px",
+      height: bounds.height + "px",
+      fontSize: "14px",
+      fontFamily: "sans-serif",
+      padding: "2px 6px",
+      border: "1px solid #333",
+      boxSizing: "border-box",
+      zIndex: 9999,
+    });
+
+    document.body.appendChild(input);
+    this.editInput = input;
+
+    input.focus();
+    input.select();
+
+    const finish = (apply) => {
+      if (!this.editInput) return; // 既に削除済みなら何もしない
+
+      if (apply) {
+        const newLabel =
+          input.value.trim().length > 0 ? input.value.trim() : oldLabel;
+
+        // 表示用の区分名を更新
+        this.categoryNames[colIndex] = newLabel;
+        textObj.setText(newLabel);
+
+        // ローカルストレージに保存（後で GameScene 連携などで使える）
+        try {
+          localStorage.setItem(
+            "categoryNames",
+            JSON.stringify(this.categoryNames)
+          );
+        } catch (e) {
+          console.warn("Failed to save categoryNames", e);
+        }
+      }
+
+      input.remove();
+      this.editInput = null;
+    };
+
+
+    input.addEventListener("blur", () => finish(true));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        finish(true);
+      } else if (e.key === "Escape") {
+        finish(false);
+      }
+    });
+  }
+
+  drawTable() {
+    const startX = 180;   // 表の左上(X)
+    const startY = 110;   // 表の左上(Y)
+    const cellW = 110;
+    const cellH = 36;
+
+    // ◯テキストの入れ物
+    this.circleTexts = {};
+    this.tableContainer = this.add.container(0, 0);
+
+    // ★ ヘッダ Text と背景を保持
+    this.categoryTexts = [];
+    this.categoryBg = [];   // ← 追加
+
+    // ===== 列ヘッダ（区分名） =====
+    CATEGORIES.forEach((category, col) => {
+      const label =
+        (this.categoryNames && this.categoryNames[col]) || category;
+
+      const x = startX + col * cellW;
+      const y = startY - 30;
+
+      // ★ 背景用 Graphics（先に作る：後から中身を描く）
+      const bg = this.add.graphics();
+
+      const headerText = this.add.text(
+        x,
+        y,
+        label,
+        {
+          fontSize: "14px",
+          color: "#000",
+          align: "center",
+          wordWrap: { width: cellW },
+          padding: { top: 10, bottom: 0 }
+        }
+      )
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true }); // クリック可能
+
+      // ★ テキストのサイズに合わせて角丸の背景を描く
+      const paddingX = 12;
+      const paddingY = 3;
+      const bounds = headerText.getBounds();
+
+      bg.fillStyle(0xe0ffff, 1); // お好みの色
+      bg.fillRoundedRect(
+        bounds.x - paddingX / 2,
+        bounds.y - paddingY / 2,
+        bounds.width + paddingX,
+        bounds.height + paddingY,
+        8
+      );
+
+      // 背景がテキストより後に作られると前に出てしまうので、
+      // 「先に bg を add して、あとから text を add」しているのがポイントです
+
+      // ★ ダブルクリック検出
+      headerText.colIndex = col;
+      headerText.lastClickTime = 0;
+
+      headerText.on("pointerdown", () => {
+        const now = this.time.now;
+        if (now - headerText.lastClickTime < 300) {
+          this.startEditCategory(headerText.colIndex, headerText);
+        }
+        headerText.lastClickTime = now;
+      });
+
+      this.categoryTexts[col] = headerText;
+      this.categoryBg[col] = bg; // ← 背景も保持
+    });
+
+
+    // ===== 行（ゴミ） =====
+    ITEMS.forEach((item, row) => {
+      const y = startY + row * cellH;
+
+      // ◯テキスト用の行を初期化
+      this.circleTexts[item] = this.circleTexts[item] || {};
+
+      // ゴミ名
+      this.tableContainer.add(
+        this.add.text(20, y, item, {
+          fontSize: "14px",
+          color: "#000",
+          padding: { top: 10, bottom: 0 }
+        }).setOrigin(0, 0.5)
+      );
+
+      // セル
+      CATEGORIES.forEach((category, col) => {
+        const x = startX + col * cellW;
+
+        // 枠（クリック可能にする）
+        const rect = this.add.rectangle(
+          x, y,
+          cellW - 4, cellH - 4,
+          0xffffff
+        )
+          .setStrokeStyle(1, 0x999999)
+          .setOrigin(0.5)
+          .setInteractive({ useHandCursor: true });
+
+        // どのアイテム・区分のセルか覚えさせる
+        rect.itemName = item;
+        rect.categoryName = category;
+
+        // ◯ 切り替え
+        rect.on("pointerdown", () => {
+          this.toggleCell(rect.itemName, rect.categoryName);
+        });
+
+        this.tableContainer.add(rect);
+
+        // ◯ テキスト（最初から全セル作り、テキストだけ切り替える）
+        const hasCircle = !!(SORT_TABLE[item] && SORT_TABLE[item][category]);
+        const circleText = this.add.text(x, y, hasCircle ? "◯" : "", {
+          fontSize: "20px",
+          color: "#d32f2f",
+          padding: { top: 10, bottom: 0 }
+        }).setOrigin(0.5);
+
+        this.tableContainer.add(circleText);
+        // 後から更新するために保持
+        this.circleTexts[item][category] = circleText;
+      });
+    });
+  }
+
+  create() {
+    // ★ 区分名（表示用）をロード or デフォルト
+    const saved = localStorage.getItem("categoryNames");
+    if (saved) {
+      try {
+        this.categoryNames = JSON.parse(saved);
+      } catch (e) {
+        this.categoryNames = [...CATEGORIES];
+      }
+    } else {
+      this.categoryNames = [...CATEGORIES];
+    }
+
+    // スクロールボタン
+    this.scrollTop = 0;
+    this.viewHeight = 300;
+    this.contentHeight = ITEMS.length * 36;
+    this.minScrollY = Math.min(0, this.viewHeight - this.contentHeight);
+
+    const upBtn = this.add.text(680, 200, "▲", {
+      fontSize: "50px",
+      color: "#333",
+      padding: { top: 10, bottom: 0 }
+    }).setInteractive({ useHandCursor: true }).setDepth(20);
+
+    const downBtn = this.add.text(680, 260, "▼", {
+      fontSize: "50px",
+      color: "#333"
+    }).setInteractive({ useHandCursor: true }).setDepth(20);
+
+    const SCROLL_STEP = 40;
+    upBtn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
+      this.scrollTop = Math.min(this.scrollTop + SCROLL_STEP, 0);
+      this.tableContainer.y = this.scrollTop;
+    });
+    downBtn.on("pointerdown", () => {
+      this.sound.play("button_click", { volume: 0.6 });
+      this.scrollTop = Math.max(this.scrollTop - SCROLL_STEP, this.minScrollY);
+      this.tableContainer.y = this.scrollTop;
+    });
+
+    // 背景
+    this.add.image(400, 300, "set_bg")
+      .setDisplaySize(800, 600);
+
+    // タイトル
+    this.add.text(400, 40, "分別ルール設定", {
+      fontSize: "32px",
+      color: "#333",
+      fontStyle: "bold",
+      padding: { top: 10, bottom: 0 }
+    }).setOrigin(0.5);
+
+
+    // 表描画
+    this.drawTable();
+
+    // 戻るボタン
+    const backBtn = this.add.image(400, 540, "back_button")
+      .setScale(0.8)
+      .setInteractive({ useHandCursor: true });
+
+    backBtn.on("pointerover", () => {
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.9,
+        duration: 120
+      });
+    });
+
+    backBtn.on("pointerout", () => {
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.8,
+        duration: 120
+      });
+    });
+
+    backBtn.on("pointerdown", () => {
+      backBtn.disableInteractive();
+      this.saveSortTableToLocalStorage();
+      this.tweens.add({
+        targets: backBtn,
+        scale: 0.7,
+        duration: 120,
+        yoyo: true
+      });
+      this.time.delayedCall(200, () => {
+        this.scene.start("HomeScene");
+      });
+    });
+  }
+}
 
 
 const config = {
@@ -1851,8 +2699,9 @@ const config = {
   width: 800,
   height: 600,
   parent: 'game',
+  
   backgroundColor: '#e0f7fa',
-  scene: [HomeScene, StartScene, GameScene, ResultScene, ItemScene, FireScene]
+  scene: [HomeScene, StartScene, GameScene, ResultScene, ItemScene, FireScene, SetScene]
 };
 
 new Phaser.Game(config);
