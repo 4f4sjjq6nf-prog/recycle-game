@@ -21,7 +21,7 @@ const SORT_TABLE = {
     "かみ・ふく": false,
     "バッテリーるい": false
   },
-  "グローブ": {
+  "クッション": {
     "ふつうごみ": true,
     "しげんごみ": false,
     "プラスチックしげん": false,
@@ -151,7 +151,7 @@ const SORT_TABLE = {
 
 const TEXTURE_TO_ITEM_NAME = {
   fishbone: "魚の骨", shoe: "靴", plate: "皿",
-  glove: "グローブ", glasses: "メガネ",
+  cushion: "クッション", glasses: "メガネ",
   can: "缶", bottle: "ビン", petbottle: "ペットボトル",
   cupramen: "カップ麺の容器", pack: "パック", tupper: "タッパー", cap: "キャップ",
   newspaper: "新聞紙", cardboard: "段ボール", kamipack: "紙パック", cloth: "衣類",
@@ -170,7 +170,7 @@ const ITEMS = [
   "魚の骨",
   "靴",
   "皿",
-  "グローブ",
+  "クッション",
   "メガネ",
   "缶",
   "ビン",
@@ -453,7 +453,7 @@ class HomeScene extends Phaser.Scene {
     this.load.image('fishbone', 'assets/trash/fishbone.png');
     this.load.image('shoe', 'assets/trash/shoe.png');
     this.load.image('plate', 'assets/trash/plate.png');
-    this.load.image('glove', 'assets/trash/glove.png');
+    this.load.image('cushion', 'assets/trash/cushion.png');
     this.load.image('glasses', 'assets/trash/glasses.png');
     this.load.image('cupramen', 'assets/trash/cupramen.png');
     this.load.image('pack', 'assets/trash/pack.png');
@@ -2653,7 +2653,7 @@ class SetScene extends Phaser.Scene {
     });
   }
 
-  //  区分名編集用（ダブルクリックで呼ばれる）
+  //  区分名編集
   startEditCategory(colIndex, textObj) {
     // 既に別の入力欄があれば消す
     if (this.editInput) {
@@ -2704,7 +2704,7 @@ class SetScene extends Phaser.Scene {
         this.categoryNames[colIndex] = newLabel;
         textObj.setText(newLabel);
 
-        // ローカルストレージに保存（後で GameScene 連携などで使える）
+        // ローカルストレージに保存
         try {
           localStorage.setItem(
             "categoryNames",
@@ -2730,7 +2730,7 @@ class SetScene extends Phaser.Scene {
     });
   }
 
-  // ゴミ名＋画像編集用（ダブルクリックで呼ばれる）
+  // ゴミ名＋画像編集
   startEditItem(itemName, nameTextObj) {
     // 既に別の編集ポップアップが出ていたら閉じる
     if (this.itemEditInput) {
@@ -2975,14 +2975,13 @@ class SetScene extends Phaser.Scene {
         }
       )
         .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true }); // クリック可能
-
+        .setInteractive({ useHandCursor: true });
       //テキストのサイズに合わせて角丸の背景を描く
       const paddingX = 12;
       const paddingY = 3;
       const bounds = headerText.getBounds();
 
-      bg.fillStyle(0xffd700, 1);
+      bg.fillStyle(0xc0c0c0, 1);
       bg.fillRoundedRect(
         bounds.x - paddingX / 2,
         bounds.y - paddingY / 2,
@@ -3032,7 +3031,7 @@ class SetScene extends Phaser.Scene {
       const paddingY = 3;
       const nameBounds = nameText.getBounds();
 
-      nameBg.fillStyle(0xffd700, 1);
+      nameBg.fillStyle(0xc0c0c0, 1);
       nameBg.fillRoundedRect(
         nameBounds.x - paddingX / 2,
         nameBounds.y - paddingY / 2,
@@ -3166,7 +3165,7 @@ class SetScene extends Phaser.Scene {
 
 
 
-    const btnOutput = this.add.image(670, 20, "output_button")
+    const btnOutput = this.add.image(670, 25, "output_button")
       .setScale(0.3)
       .setDepth(202)
       .setInteractive({ useHandCursor: true });
@@ -3195,8 +3194,8 @@ class SetScene extends Phaser.Scene {
     });
 
 
-    const BtnReset = this.add.image(50, 20, "logreset_button")
-      .setScale(0.36)
+    const BtnReset = this.add.image(55, 25, "logreset_button")
+      .setScale(0.37)
       .setDepth(202)
       .setInteractive({ useHandCursor: true });
 
@@ -3280,7 +3279,7 @@ class SetScene extends Phaser.Scene {
       padding: { top: 10, bottom: 0 }
     }).setOrigin(0.5);
 
-    const howtoBtn = this.add.image(750, 20, "howtoset_button")
+    const howtoBtn = this.add.image(745, 25, "howtoset_button")
       .setScale(0.4)
       .setDepth(10)
       .setInteractive({ useHandCursor: true });
