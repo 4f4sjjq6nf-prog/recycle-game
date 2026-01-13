@@ -1,5 +1,5 @@
 //定義データ
-const SORT_TABLE = {
+const SORT_TABLE = {//正しい分別先の初期値
   "魚の骨": {
     "ふつうごみ": true,
     "しげんごみ": false,
@@ -1096,15 +1096,14 @@ class GameScene extends Phaser.Scene {
       .setScale(0.13);
 
     // 吹き出し
-    this.bubble = this.add.image(540, 60, "bubble")
+    this.bubble = this.add.image(570, 60, "bubble")
       .setDepth(103)
-      .setScale(0.38)
+      .setScale(0.45)
       .setVisible(false);
 
-    this.bubbleText = this.add.text(452, 38, "", {
-      fontSize: "16px",
+    this.bubbleText = this.add.text(460, 34, "", {
+      fontSize: "20px",
       color: "#000",
-      fontStyle: "bold",
       wordWrap: { width: 140 },
       padding: { top: 10, bottom: 0 }
     })
@@ -1157,7 +1156,7 @@ class GameScene extends Phaser.Scene {
 
     this.timeLimit = 40;
     this.timerText = this.add.text(20, 20, "時間: 40", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
-    this.scoreText = this.add.text(660, 20, "スコア: 0", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
+    this.scoreText = this.add.text(160, 20, "スコア: 0", { fontSize: "24px", color: "#000", padding: { top: 10, bottom: 0 } }).setDepth(102);
 
     const savedNames = localStorage.getItem("categoryNames");
     if (savedNames) {
@@ -1198,7 +1197,6 @@ class GameScene extends Phaser.Scene {
       // ゴミ箱の「表示用の名前」（SetSceneで編集したもの）
       const label = this.categoryNames[i] || category;
 
-      // まずは少し大きめのサイズでテキスト作成
       const maxFontSize = 18;
       const minFontSize = 10;
       const maxLabelWidth = bin.displayWidth * 0.8; // bin 幅の 80% 以内に収める
@@ -2046,7 +2044,7 @@ class ResultScene extends Phaser.Scene {
     const isBestUpdate = score > bestScore;
 
     // 表示するベストスコアは更新前の値
-    this.add.text(442, 157, `${bestScore}`, {
+    this.add.text(442, 147, `${bestScore}`, {
       fontSize: '22px',
       color: '#000',
       fontStyle: "bold",
@@ -2447,16 +2445,16 @@ class ItemScene extends Phaser.Scene {
     };
 
     const descriptionData = {
-      pet_juice: "回収されたペットボトルから、あたらしい\nペットボトルが作られることもあります。\nこれを「水平リサイクル」と呼びます。",
-      rucksack: "ペットボトルからリサイクルされたリュッ\nクサック。\nペットボトルから作られたポリエステル繊\n維は、耐久性が高く、水分を吸いにくいた\nめ、乾きやすいという特徴があります。",
-      ruler: "ペットボトルからリサイクルされたものさ\nし。\nプラスチックでできている文房具はペット\nボトルからリサイクルされているものがあ\nります。",
-      jersey: "回収されたペットボトルは、洗われて細か\nいフレークにくだかれます。そのフレーク\nをさらに溶かして、細い糸のようにしてい\nきます。できあがった糸をあつめて布にす\nると、ジャージやバッグなど、新しい製品\nとして生まれ変わることができます。",
-      fan: "缶からリサイクルされた扇風機。スチール\n缶はモーターの部品にリサイクルされるこ\nともあります。\n扇風機以外にも家電の部品に再生され、生\n活を支えています。",
-      bike: "アルミ缶やスチール缶はリサイクルされて\n自転車の部品になることもあります。\nアルミ缶約1000個で１台の自転車が完成し\nます。※12kgの自転車で全部品がアルミで\n作られているとした場合。",
-      clock: "缶からリサイクルされた目覚まし時計。\nスチール缶はモーターの部品にリサイクル\nされることもあります。",
-      glass_juice: "回収されたビンから、あたらしいビンが作\nられることもあります。\nこれを「水平リサイクル」と呼びます。",
-      bead: "ビンからリサイクルされたビー玉。\nビー玉以外にも建物の断熱材などに再生さ\nれています",
-      cup: "ビンからリサイクルされたガラスコップ。\nコップ以外にも建物の断熱材などに再生さ\nれています"
+      pet_juice: "あつめられたペットボトルから、あたらし\nいペットボトルが作られることもあるよ。\nこれを「水平リサイクル」とよぶよ。",
+      rucksack: "ペットボトルからリサイクルされたリュッ\nクサック。\nペットボトルから作られたポリエステルの\n糸は、じょうぶで、水分をすいにくいの\nで、かわきやすいよ！",
+      ruler: "ペットボトルからリサイクルされたものさ\nし。\nプラスチックでできているぶんぼうぐはペ\nットボトルからリサイクルされているもの\nもあるよ。",
+      jersey: "あつめられたペットボトルは、あらってこ\nまかいフレークにくだかれるよ。そのフレ\nークをさらにとかして、ほそい糸のように\nするよ。できあがった糸をあつめて布にす\nると、ジャージやバッグなど、新しい「も\nの」としてうまれかわることができるよ。",
+      fan: "缶からリサイクルされたせんぷうき。スチ\nール缶はモーターのぶひんにリサイクルさ\nれることもあるよ。\nせんぷうきのほかも、かでんの部品になっ\nて、生活をささえているよ。",
+      bike: "アルミ缶やスチール缶はリサイクルされて\nじてんしゃの部品になることもありるよ。\nアルミ缶1000個で１台のじてんしゃがかん\nせいするよ。\n※12kgの自転車で全部品がアルミで作られ\nているとした場合。",
+      clock: "缶からリサイクルされた目ざましどけい。\nスチール缶はモーターの部品にリサイクル\nされることもあるよ。",
+      glass_juice: "あつめられたビンから、あたらしいビンが\n作られることもあるよ。\nこれを「水平リサイクル」とよぶよ。",
+      bead: "ビンからリサイクルされたビー玉。\nビー玉い外にもたてものの、だんねつざい\nなどにリサイクルされているよ",
+      cup: "ビンからリサイクルされたガラスコップ。\nコップ以外にもたてものの、だんねつざい\nなどにリサイクルされているよ"
     };
     const descFrame = this.add.image(400, 380, "desc_frame")
       .setDepth(51)
@@ -3084,6 +3082,7 @@ class SetScene extends Phaser.Scene {
         const circleText = this.add.text(x, y, hasCircle ? "◯" : "", {
           fontSize: "20px",
           color: "#d32f2f",
+
           padding: { top: 10, bottom: 0 }
         }).setOrigin(0.5);
 
