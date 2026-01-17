@@ -1467,8 +1467,18 @@ class GameScene extends Phaser.Scene {
 
 
   spawnTrash() {
-    // 今回出すカテゴリ（ゴミ箱）をランダムに選ぶ
-    const category = Phaser.Utils.Array.GetRandom(this.selectedCategories);
+    // ゴミが1つ以上あるカテゴリだけ抽出
+    const validCategories = this.selectedCategories.filter(cat => {
+      const list = this.itemsByCategory[cat];
+      return list && list.length > 0;
+    });
+
+    if (validCategories.length === 0) {
+      return; // 出せるゴミが無い
+    }
+
+    const category = Phaser.Utils.Array.GetRandom(validCategories);
+
 
     // SetScene で決めた対応をもとにしたリスト（SORT_TABLEから生成済み）
     const dynamicItems = (this.itemsByCategory && this.itemsByCategory[category]) || [];
@@ -2744,7 +2754,7 @@ class SetScene extends Phaser.Scene {
     const canvasRect = canvas.getBoundingClientRect();
 
     const displayName = getItemDisplayName(itemName);
-    const textureKey = ITEM_NAME_TO_TEXTURE_KEY[itemName]; 
+    const textureKey = ITEM_NAME_TO_TEXTURE_KEY[itemName];
 
     const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
       .setDepth(400)
