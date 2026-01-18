@@ -450,6 +450,8 @@ class HomeScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio("fire_bgm", "assets/bgm/fire_bgm.mp3");
+
     this.load.image('fishbone', 'assets/trash/fishbone.png');
     this.load.image('shoe', 'assets/trash/shoe.png');
     this.load.image('plate', 'assets/trash/plate.png');
@@ -508,6 +510,7 @@ class HomeScene extends Phaser.Scene {
     this.load.image("help_panel", "assets/ui/help_panel.png");
     this.load.image("complete", "assets/ui/complete.png");
     this.load.video("battery_fire", "assets/video/battery_fire.mp4", true);
+    this.load.image("challenge_button", "assets/ui/challenge_button.png");
   }
 
   openHowtoPopup(isFirst = false) {
@@ -628,8 +631,6 @@ class HomeScene extends Phaser.Scene {
 
 
 
-
-
     //ホーム背景
 
     this.add.image(400, 300, "home_bg").setDisplaySize(800, 600).setDepth(0);
@@ -740,7 +741,7 @@ class HomeScene extends Phaser.Scene {
       .setInteractive()
       .setDepth(201);
     // 分別チャレンジ
-    const btnChallenge = this.add.text(310, 225, "● 分別チャレンジ", {
+    const btnChallenge = this.add.text(320, 225, "分別チャレンジ", {
       fontSize: "22px",
       color: "#00796b",
       padding: { top: 10, bottom: 0 }
@@ -752,7 +753,7 @@ class HomeScene extends Phaser.Scene {
     });
 
     // アイテム一覧
-    const btnItems = this.add.text(310, 285, "● アイテム", {
+    const btnItems = this.add.text(320, 285, "アイテム", {
       fontSize: "22px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
@@ -764,7 +765,7 @@ class HomeScene extends Phaser.Scene {
     });
 
     // あそびかた
-    const btnHowTo = this.add.text(310, 345, "● あそびかた", {
+    const btnHowTo = this.add.text(320, 345, "あそびかた", {
       fontSize: "22px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
@@ -851,26 +852,6 @@ class StartScene extends Phaser.Scene {
     // カスタム画像を反映
     applyCustomItemTexturesToScene(this);
 
-    //正しい分別表
-    this.helpBtn = this.add.image(760, 35, "help_button")
-      .setDepth(100)
-
-      .setScale(0.15)
-      .setInteractive({ useHandCursor: true });
-
-    // ホバー演出
-    this.helpBtn.on("pointerover", () => {
-      this.tweens.add({ targets: this.helpBtn, scale: 0.17, duration: 120 });
-    });
-    this.helpBtn.on("pointerout", () => {
-      this.tweens.add({ targets: this.helpBtn, scale: 0.15, duration: 120 });
-    });
-
-    //クリックでヘルプポップアップ
-    this.helpBtn.on("pointerdown", () => {
-      this.sound.play("button_click", { volume: 0.6 });
-      this.openHelpPopup();
-    });
 
     currentDifficulty = "easy";
 
@@ -927,7 +908,7 @@ class StartScene extends Phaser.Scene {
 
 
     // 戻るボタン
-    const backBtn = this.add.image(490, 280, "back_button")
+    const backBtn = this.add.image(490, 354, "back_button")
       .setInteractive({ useHandCursor: true })
       .setScale(0.7);
 
@@ -967,9 +948,9 @@ class StartScene extends Phaser.Scene {
 
 
 
-    const startBtn = this.add.image(490, 354, 'start_button')
+    const startBtn = this.add.image(490, 280, 'start_button')
       .setInteractive({ useHandCursor: true })
-      .setScale(0.7);
+      .setScale(0.71);
 
     // ホバー時アニメーション
     startBtn.on("pointerover", () => {
@@ -982,7 +963,7 @@ class StartScene extends Phaser.Scene {
     startBtn.on("pointerout", () => {
       this.tweens.add({
         targets: startBtn,
-        scale: 0.7,
+        scale: 0.71,
         duration: 120
       });
     });
@@ -2562,18 +2543,30 @@ class FireScene extends Phaser.Scene {
   }
 
   preload() {
-
-
+    this.load.audio("fire_bgm", "assets/bgm/fire_bgm.mp3"); // ← 追加
   }
 
-
   create() {
+    // ★ FireSceneに移った瞬間からBGM再生
+    this.fireBgm = this.sound.add("fire_bgm", {
+      volume: 0.5,
+      loop: true
+    });
+    this.fireBgm.play();
+
+    // ★ シーン終了時に必ずBGM停止
+    this.events.once("shutdown", () => {
+      if (this.fireBgm) {
+        this.fireBgm.stop();
+        this.fireBgm.destroy();
+        this.fireBgm = null;
+      }
+    });
+
     this.cameras.main.setBackgroundColor("#000");
 
     const video = this.add.video(400, 300, "battery_fire");
-
     video.setScale(0.56);
-
     video.play();
 
     video.on("complete", () => {
@@ -2583,13 +2576,8 @@ class FireScene extends Phaser.Scene {
 
   shutdown() {
     const video = document.getElementById("fireVideo");
-    video.style.display = "none";
+    if (video) video.style.display = "none";
   }
-
-
-
-
-
 
   showBackButton() {
     const btn = this.add.image(400, 500, "back_button")
@@ -2608,6 +2596,13 @@ class FireScene extends Phaser.Scene {
       this.sound.play("button_click", { volume: 0.6 });
       btn.disableInteractive();
 
+      // ★ 戻るボタン押下でBGM停止
+      if (this.fireBgm) {
+        this.fireBgm.stop();
+        this.fireBgm.destroy();
+        this.fireBgm = null;
+      }
+
       this.tweens.add({
         targets: btn,
         scale: 0.7,
@@ -2621,6 +2616,7 @@ class FireScene extends Phaser.Scene {
     });
   }
 }
+
 class SetScene extends Phaser.Scene {
   constructor() {
     super("SetScene");
