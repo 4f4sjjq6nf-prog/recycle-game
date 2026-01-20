@@ -1214,12 +1214,39 @@ class GameScene extends Phaser.Scene {
 
 
     // ドラッグ設定
-    this.input.on("dragstart", (p, obj) => (obj.isDragging = true));
+
+    this.input.on("dragstart", (p, obj) => {
+      obj.isDragging = true;
+
+      // 元の拡大率を保持（初回だけ）
+      if (obj.baseScale == null) obj.baseScale = obj.scaleX;
+
+      // 掴んだら大きくする（倍率は好みで調整）
+      this.tweens.add({
+        targets: obj,
+        scale: obj.baseScale * 1.25,
+        duration: 80
+      });
+
+      // 前面に出す（必要なら）
+      obj.setDepth(999);
+    });
+
     this.input.on("drag", (p, obj, x, y) => {
       obj.x = x;
       obj.y = y;
     });
-    this.input.on("dragend", (p, obj) => (obj.isDragging = false));
+
+    this.input.on("dragend", (p, obj) => {
+      obj.isDragging = false;
+
+      //離したら元に戻す
+      if (obj.baseScale != null) obj.setScale(obj.baseScale);
+
+      // depth も戻したいなら（任意）
+      obj.setDepth(0);
+    });
+
 
     // ドロップ処理
     this.input.on("drop", (pointer, obj, zone) => {
