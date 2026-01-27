@@ -598,35 +598,6 @@ class HomeScene extends Phaser.Scene {
       });
     }
 
-    //メニューボタン
-    const menuBtn = this.add.image(760, 40, 'menu_button')
-      .setInteractive({ useHandCursor: true })
-      .setScale(0.3)
-      .setDepth(20);
-
-    //ホバー
-    menuBtn.on("pointerover", () => {
-      this.tweens.add({
-        targets: menuBtn,
-        scale: 0.35,
-        duration: 120,
-        ease: "Sine.easeOut"
-      });
-    });
-    //ホバー解除
-    menuBtn.on("pointerout", () => {
-      this.tweens.add({
-        targets: menuBtn,
-        scale: 0.3,
-        duration: 120,
-        ease: "Sine.easeOut"
-      });
-    });
-    menuBtn.on('pointerdown', () => {
-      this.openMenuPopup();
-      this.sound.play("button_click", { volume: 0.6 });
-    });
-
 
 
 
@@ -635,7 +606,7 @@ class HomeScene extends Phaser.Scene {
 
     this.add.image(400, 300, "home_bg").setDisplaySize(800, 600).setDepth(0);
 
-
+    this.createMenuPanel();
     //所持アイテム読み込み
     const owned = JSON.parse(localStorage.getItem("ownedItems")) || [];
 
@@ -696,12 +667,12 @@ class HomeScene extends Phaser.Scene {
     const ITEM_POS = {
       fan: { x: 240, y: 420, scale: 0.22 },
       bike: { x: 58, y: 503, scale: 0.8 },
-      clock: { x: 525, y: 330, scale: 0.13 },
+      clock: { x: 530, y: 330, scale: 0.11 },
       cup: { x: 463, y: 513, scale: 0.11 },
       glass_juice: { x: 500, y: 478, scale: 0.14 },
       pet_juice: { x: 530, y: 489, scale: 0.14 },
       rucksack: { x: 670, y: 500, scale: 0.2 },
-      jersey: { x: 360, y: 280, scale: 0.27 },
+      jersey: { x: 250, y: 190, scale: 0.27 },
       ruler: { x: 650, y: 520, scale: 0.12 },
       bead: { x: 290, y: 580, scale: 0.07 }
     };
@@ -728,24 +699,20 @@ class HomeScene extends Phaser.Scene {
     }
   }
 
-  // メニューのポップアップ表示 
-  openMenuPopup() {
+  // メニューを常時表示（中央固定）
+  createMenuPanel() {
 
-    // 半透明の背景
-    const bg = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.4)
-      .setInteractive()
-      .setDepth(200);
-    // メニューパネル
-    const panel = this.add.rectangle(400, 300, 300, 200, 0xffffff, 1)
+    // ★ メニューパネル（暗幕なし）
+    const panel = this.add.rectangle(400, 255, 200, 170, 0xffffff, 1)
       .setStrokeStyle(3, 0x666666)
-      .setInteractive()
-      .setDepth(201);
+      .setDepth(200);
+
     // 分別チャレンジ
-    const btnChallenge = this.add.text(320, 225, "分別チャレンジ", {
-      fontSize: "22px",
+    const btnChallenge = this.add.text(400, 200, "分別チャレンジ", {
+      fontSize: "20px",
       color: "#00796b",
       padding: { top: 10, bottom: 0 }
-    }).setInteractive({ useHandCursor: true }).setDepth(202);
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(201);
 
     btnChallenge.on('pointerdown', () => {
       this.sound.play("button_click", { volume: 0.6 });
@@ -753,11 +720,11 @@ class HomeScene extends Phaser.Scene {
     });
 
     // アイテム一覧
-    const btnItems = this.add.text(320, 285, "アイテム", {
-      fontSize: "22px",
+    const btnItems = this.add.text(400, 250, "アイテム", {
+      fontSize: "20px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
-    }).setInteractive({ useHandCursor: true }).setDepth(202);
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(201);
 
     btnItems.on('pointerdown', () => {
       this.sound.play("button_click", { volume: 0.6 });
@@ -765,51 +732,33 @@ class HomeScene extends Phaser.Scene {
     });
 
     // あそびかた
-    const btnHowTo = this.add.text(320, 345, "あそびかた", {
-      fontSize: "22px",
+    const btnHowTo = this.add.text(400, 300, "あそびかた", {
+      fontSize: "20px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
-    })
-      .setInteractive({ useHandCursor: true })
-      .setDepth(202);
-
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(201);
 
     btnHowTo.on("pointerdown", () => {
       this.sound.play("button_click", { volume: 0.6 });
-      this.openHowtoPopup(false); // false = 初回ではない
-
+      this.openHowtoPopup(false);
     });
 
-    const btnSet = this.add.text(480, 372, "[管理画面]", {
-      fontSize: "13px",
+    // 管理画面
+    const btnSet = this.add.text(470, 325, "[管理画面]", {
+      fontSize: "11px",
       color: "#444",
       padding: { top: 10, bottom: 0 }
-    })
-      .setInteractive({ useHandCursor: true })
-      .setDepth(202);
-
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(201);
 
     btnSet.on("pointerdown", () => {
       this.sound.play("button_click", { volume: 0.6 });
       this.scene.start('SetScene');
     });
 
-
-
-
-    // 背景クリックで閉じる
-    bg.on('pointerdown', () => {
-      bg.destroy();
-      panel.destroy();
-      btnChallenge.destroy();
-      btnItems.destroy();
-      btnHowTo.destroy();
-      btnSet.destroy();
-
-    });
-
-
+    // ★ 後で位置調整したくなった時のためにまとめて保持してもOK
+    this.menuPanelObjects = [panel, btnChallenge, btnItems, btnHowTo, btnSet];
   }
+
 }
 
 
@@ -1455,7 +1404,8 @@ class GameScene extends Phaser.Scene {
         if (this.timeLimit <= 0) {
           this.bgm.stop();
           this.scene.start("ResultScene", {
-            missCounts: this.missCounts
+            missCounts: this.missCounts,
+            difficultyKey: this.difficultyKey
           });
         }
       },
@@ -1634,15 +1584,23 @@ class ResultScene extends Phaser.Scene {
     this.load.image("best_update", "assets/char/best_update.png");
     this.load.image("spark", "assets/effects/spark.png");
     this.load.image("text_get", "assets/ui/text_get.png");
-    this.load.image("reflect_normal", "assets/ui/reflect_normal.png");
-    this.load.image("reflect_recycle", "assets/ui/reflect_recycle.png");
-    this.load.image("reflect_plastic", "assets/ui/reflect_plastic.png");
-    this.load.image("reflect_paper", "assets/ui/reflect_paper.png");
-    this.load.image("reflect_perfect", "assets/ui/reflect_perfect.png");
+    this.load.image("score_high", "assets/ui/score_high.png");
+    this.load.image("score_low", "assets/ui/score_low.png");
+    this.load.image("recycled_from_pet", "assets/ui/recycled_from_pet.png");      // ペットボトルからリサイクルされた
+    this.load.image("recycled_from_can", "assets/ui/recycled_from_can.png");      // 缶からリサイクルされた
+    this.load.image("recycled_from_bottle", "assets/ui/recycled_from_bottle.png");// ビンからリサイクルされた
   }
 
   constructor() {
     super('ResultScene');
+  }
+  getRecycleLabelKey(gaugeType) {
+    const map = {
+      pet: "recycled_from_pet",
+      can: "recycled_from_can",
+      bottle: "recycled_from_bottle"
+    };
+    return map[gaugeType] || null;
   }
 
   drawGauge(x, y, width, height, value) {
@@ -1831,12 +1789,22 @@ class ResultScene extends Phaser.Scene {
     ownedItems.push(selected);
     localStorage.setItem("ownedItems", JSON.stringify(ownedItems));
 
-    // アイテム登場
+    const labelKey = this.getRecycleLabelKey(gaugeType);
+
+    this.recycleFromLabel = null;
+    if (labelKey) {
+      this.recycleFromLabel = this.add.image(400, 60, labelKey)
+        .setDepth(33)
+        .setAlpha(0)
+        .setScale(0);
+    }
+
     this.item = this.add.image(400, 300, selected)
       .setScale(0)
       .setAlpha(0)
       .setDepth(31);
 
+    // アイテムズーム
     this.tweens.add({
       targets: this.item,
       alpha: 1,
@@ -1854,6 +1822,19 @@ class ResultScene extends Phaser.Scene {
         });
       }
     });
+
+    // ラベルズーム（同時）
+    if (this.recycleFromLabel) {
+      this.tweens.add({
+        targets: this.recycleFromLabel,
+        alpha: 1,
+        scale: { from: 0, to: 0.45 },
+        duration: 600,
+        ease: "Back.easeOut"
+      });
+
+    }
+
 
     // 星エフェクト
     for (let i = 0; i < 15; i++) {
@@ -1875,7 +1856,7 @@ class ResultScene extends Phaser.Scene {
     }
 
     // 「アイテム獲得」
-    this.textGet = this.add.image(400, 430, "text_get")
+    this.textGet = this.add.image(400, 470, "text_get")
       .setOrigin(0.5)
       .setDepth(33)
       .setScale(0);
@@ -1910,8 +1891,7 @@ class ResultScene extends Phaser.Scene {
             onComplete: () => {
               this.dimLayer.setVisible(false);
               this.dimLayer.disableInteractive();
-              //「ふりかえり」の演出
-              this.showReflectionPopup();
+
             }
           });
         });
@@ -1931,7 +1911,7 @@ class ResultScene extends Phaser.Scene {
     }
 
     // アイテムとテキストのフェードアウト
-    const objs = [this.item, this.textGet];
+    const objs = [this.item, this.textGet, this.recycleFromLabel];
 
     objs.forEach(obj => {
       if (!obj) return;
@@ -1985,6 +1965,7 @@ class ResultScene extends Phaser.Scene {
       "かみ・ふく": "reflect_paper",
       "none": "reflect_perfect"
     };
+    this.difficultyKey = data?.difficultyKey || "easy";
   }
 
   showReflectionPopup() {
@@ -2027,6 +2008,54 @@ class ResultScene extends Phaser.Scene {
     return max === 0 ? null : result;
   }
 
+  showScorePopupIfNeeded(onClose) {
+    // 難易度ごとの閾値
+    const THRESHOLD = {
+      easy: 51,
+      normal: 91,
+      hard: 111
+    };
+
+    const t = THRESHOLD[this.difficultyKey] ?? 51;
+
+    // スコアが「より大きい」ならハイスコア画像
+    const isHigh = score > t;
+    const key = isHigh ? "score_high" : "score_low";
+
+    // 暗幕（宝箱用 dimLayer と混ざらないよう別物を使う）
+    const dim = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.55)
+      .setDepth(500)
+      .setInteractive();
+
+    // 画像（小→大ズーム）
+    const img = this.add.image(400, 300, key)
+      .setDepth(501)
+      .setScale(0.05)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: img,
+      scale: { from: 0.05, to: 0.7 },
+      alpha: { from: 0, to: 1 },
+      duration: 450,
+      ease: "Back.easeOut"
+    });
+
+    const close = () => {
+      dim.destroy();
+      img.destroy();
+      if (onClose) onClose();
+    };
+
+    // クリックで閉じる
+    dim.once("pointerdown", close);
+    img.once("pointerdown", (e) => {
+      e.stopPropagation();
+      close();
+    });
+  }
+
+
 
   create() {
     const MISS_PRIORITY = [
@@ -2061,8 +2090,8 @@ class ResultScene extends Phaser.Scene {
     //  今回スコアがベストスコアを超えたか
     const isBestUpdate = score > bestScore;
 
-    // 表示するベストスコアは更新前の値
-    this.add.text(442, 147, `${bestScore}`, {
+    // 表示用テキストを保持しておく
+    const bestText = this.add.text(442, 147, `${bestScore}`, {
       fontSize: '22px',
       color: '#000',
       fontStyle: "bold",
@@ -2071,12 +2100,12 @@ class ResultScene extends Phaser.Scene {
 
     // 更新していたら演出
     if (isBestUpdate) {
-      const img = this.add.image(650, 150, "best_update")
+      bestScore = score; // 以降このシーン内でもbestScoreは最新扱い
+      localStorage.setItem("bestScore", String(bestScore)); // 今すぐ保存
+      bestText.setText(String(bestScore)); // 今すぐ表示も更新
 
-        .setScale(0.3);
-
-
-
+      // 更新演出
+      this.add.image(650, 150, "best_update").setScale(0.3);
     }
 
 
@@ -2159,10 +2188,7 @@ class ResultScene extends Phaser.Scene {
       this.sound.play("button_click", { volume: 0.6 });
 
       backBtn.disableInteractive();
-      // ベストスコア更新保存
-      if (score > bestScore) {
-        localStorage.setItem("bestScore", String(score));
-      }
+
       // 押し込みアニメーション
       this.tweens.add({
         targets: backBtn,
@@ -2233,16 +2259,23 @@ class ResultScene extends Phaser.Scene {
     }
 
 
-    // ゲージ満タンで未所持アイテムがある時だけ宝箱へ
-    if (this.fullGauges.length > 0) {
-      this.currentIndex = 0;
-      this.showTreasureAnimation();
-    } else {
 
-      this.time.delayedCall(1500, () => {
-        this.showReflectionPopup();
-      });
-    }
+
+    const startTreasureIfAny = () => {
+      // ゲージ満タンで未所持アイテムがある時だけ宝箱へ
+      if (this.fullGauges.length > 0) {
+        this.currentIndex = 0;
+        this.showTreasureAnimation();
+      } else {
+        // 何もしない
+      }
+    };
+
+    // スコア画像ポップアップ閉じたら宝箱
+    this.time.delayedCall(800, () => {//少し待つ
+      this.showScorePopupIfNeeded(startTreasureIfAny);
+    });
+
 
 
 
@@ -2463,16 +2496,16 @@ class ItemScene extends Phaser.Scene {
     };
 
     const descriptionData = {
-      pet_juice: "あつめられたペットボトルから、あたらし\nいペットボトルが作られることもあるよ。\nこれを「水平リサイクル」とよぶよ。",
-      rucksack: "ペットボトルからリサイクルされたリュッ\nクサック。\nペットボトルから作られたポリエステルの\n糸は、じょうぶで、水分をすいにくいの\nで、かわきやすいよ！",
-      ruler: "ペットボトルからリサイクルされたものさ\nし。\nプラスチックでできているぶんぼうぐはペ\nットボトルからリサイクルされているもの\nもあるよ。",
-      jersey: "あつめられたペットボトルは、あらってこ\nまかいフレークにくだかれるよ。そのフレ\nークをさらにとかして、ほそい糸のように\nするよ。できあがった糸をあつめて布にす\nると、ジャージやバッグなど、新しい「も\nの」としてうまれかわることができるよ。",
-      fan: "缶からリサイクルされたせんぷうき。スチ\nール缶はモーターのぶひんにリサイクルさ\nれることもあるよ。\nせんぷうきのほかも、かでんの部品になっ\nて、生活をささえているよ。",
-      bike: "アルミ缶やスチール缶はリサイクルされて\nじてんしゃの部品になることもありるよ。\nアルミ缶1000個で１台のじてんしゃがかん\nせいするよ。\n※12kgの自転車で全部品がアルミで作られ\nているとした場合。",
-      clock: "缶からリサイクルされた目ざましどけい。\nスチール缶はモーターの部品にリサイクル\nされることもあるよ。",
-      glass_juice: "あつめられたビンから、あたらしいビンが\n作られることもあるよ。\nこれを「水平リサイクル」とよぶよ。",
-      bead: "ビンからリサイクルされたビー玉。\nビー玉い外にもたてものの、だんねつざい\nなどにリサイクルされているよ",
-      cup: "ビンからリサイクルされたガラスコップ。\nコップ以外にもたてものの、だんねつざい\nなどにリサイクルされているよ"
+      pet_juice: "ペットボトルジュース\nあつめられたペットボトルから、あたらし\nいペットボトルが作られることもあるよ。\nこれを「水平リサイクル」とよぶよ。",
+      rucksack: "りゅっくさっく\nペットボトルからリサイクルされたリュッ\nクサック。\nペットボトルから作られたポリエステルの\n糸は、じょうぶで、水分をすいにくいの\nで、かわきやすいよ！",
+      ruler: "じょうぎ\nペットボトルからリサイクルされたものさ\nし。\nプラスチックでできているぶんぼうぐはペ\nットボトルからリサイクルされているもの\nもあるよ。",
+      jersey: "ジャージ\nあつめられたペットボトルは、あらってこ\nまかいフレークにくだかれるよ。そのフレ\nークをさらにとかして、ほそい糸のように\nするよ。できあがった糸をあつめて布にす\nると、ジャージやバッグなど、新しい「も\nの」としてうまれかわることができるよ。",
+      fan: "せんぷうき\n缶からリサイクルされたせんぷうき。スチ\nール缶はモーターのぶひんにリサイクルさ\nれることもあるよ。\nせんぷうきのほかも、かでんの部品になっ\nて、生活をささえているよ。",
+      bike: "じてんしゃ\nアルミ缶やスチール缶はリサイクルされて\nじてんしゃの部品になることもありるよ。\nアルミ缶1000個で１台のじてんしゃがかん\nせいするよ。\n※12kgの自転車で全部品がアルミで作られ\nているとした場合。",
+      clock: "めざましどけい\n缶からリサイクルされた目ざましどけい。\nスチール缶はモーターの部品にリサイクル\nされることもあるよ。",
+      glass_juice: "ビンジュース\nあつめられたビンから、あたらしいビンが\n作られることもあるよ。\nこれを「水平リサイクル」とよぶよ。",
+      bead: "ビー玉\nビンからリサイクルされたビー玉。\nビー玉い外にもたてものの、だんねつざい\nなどにリサイクルされているよ",
+      cup: "コップ\nビンからリサイクルされたガラスコップ。\nコップ以外にもたてものの、だんねつざい\nなどにリサイクルされているよ"
     };
     const descFrame = this.add.image(400, 380, "desc_frame")
       .setDepth(51)
@@ -2481,7 +2514,7 @@ class ItemScene extends Phaser.Scene {
 
     //説明テキスト
     const baseText = this.add.text(230, 375, descriptionData[id] || "", {
-      fontSize: "18px",
+      fontSize: "16px",
       color: "#333",
       wordWrap: { width: 380 },
       padding: { top: 10, bottom: 0 }
@@ -2576,7 +2609,7 @@ class FireScene extends Phaser.Scene {
   create() {
     // ★ FireSceneに移った瞬間からBGM再生
     this.fireBgm = this.sound.add("fire_bgm", {
-      volume: 0.5,
+      volume: 2,
       loop: true
     });
     this.fireBgm.play();
